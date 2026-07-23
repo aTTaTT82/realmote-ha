@@ -1,0 +1,112 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "RealMote-Hub hinzufügen",
+        "description": "Falls der Hub nicht automatisch gefunden wurde, trage seine Geräte-ID ein (steht auf der /health-Seite des Hubs).",
+        "data": {
+          "device_id": "Geräte-ID (z. B. rm-cf0530)",
+          "name": "Name",
+          "base_topic": "Basis-Topic"
+        }
+      },
+      "confirm": {
+        "title": "RealMote gefunden",
+        "description": "Hub „{name}“ ({id}) jetzt hinzufügen?"
+      }
+    },
+    "abort": {
+      "already_configured": "Dieser Hub ist bereits eingerichtet.",
+      "invalid_discovery": "Ungültige Geräte-Meldung empfangen."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Tastenbelegung",
+        "description": "Wähle eine Taste zum Belegen – oder „Fertig“.",
+        "menu_options": {
+          "button_1": "Taste 1",
+          "button_2": "Taste 2",
+          "button_3": "Taste 3",
+          "button_4": "Taste 4",
+          "button_5": "Taste 5",
+          "button_6": "Taste 6",
+          "finish": "Fertig"
+        }
+      },
+      "button_1": {
+        "title": "Taste 1 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "button_2": {
+        "title": "Taste 2 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "button_3": {
+        "title": "Taste 3 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "button_4": {
+        "title": "Taste 4 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "button_5": {
+        "title": "Taste 5 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "button_6": {
+        "title": "Taste 6 belegen",
+        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+        "data": {
+          "entity": "Gerät",
+          "action": "Aktion",
+          "brightness": "Helligkeit % (nur Lampe bei „An“)",
+          "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      }
+    }
+  },
+  "selector": {
+    "action": {
+      "options": {
+        "toggle": "Umschalten",
+        "on": "An",
+        "off": "Aus",
+        "open": "Öffnen (Rollo)",
+        "close": "Schließen (Rollo)",
+        "position": "Position setzen (Rollo)"
+      }
+    }
+  }
+}

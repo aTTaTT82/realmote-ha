@@ -1,0 +1,12 @@
+{
+  "domain": "realmote",
+  "name": "RealMote",
+  "version": "0.1.0",
+  "config_flow": true,
+  "dependencies": ["mqtt"],
+  "mqtt": ["realmote/+/announce"],
+  "codeowners": ["@aTTaTT82"],
+  "documentation": "https://github.com/aTTaTT82/realmote-ha",
+  "issue_tracker": "https://github.com/aTTaTT82/realmote-ha/issues",
+  "iot_class": "local_push"
+}

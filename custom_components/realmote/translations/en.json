@@ -1,0 +1,112 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add RealMote hub",
+        "description": "If the hub was not auto-discovered, enter its device ID (shown on the hub's /health page).",
+        "data": {
+          "device_id": "Device ID (e.g. rm-cf0530)",
+          "name": "Name",
+          "base_topic": "Base topic"
+        }
+      },
+      "confirm": {
+        "title": "RealMote found",
+        "description": "Add hub \"{name}\" ({id}) now?"
+      }
+    },
+    "abort": {
+      "already_configured": "This hub is already set up.",
+      "invalid_discovery": "Received an invalid device announcement."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Button assignment",
+        "description": "Pick a button to assign – or \"Done\".",
+        "menu_options": {
+          "button_1": "Button 1",
+          "button_2": "Button 2",
+          "button_3": "Button 3",
+          "button_4": "Button 4",
+          "button_5": "Button 5",
+          "button_6": "Button 6",
+          "finish": "Done"
+        }
+      },
+      "button_1": {
+        "title": "Assign button 1",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "button_2": {
+        "title": "Assign button 2",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "button_3": {
+        "title": "Assign button 3",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "button_4": {
+        "title": "Assign button 4",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "button_5": {
+        "title": "Assign button 5",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "button_6": {
+        "title": "Assign button 6",
+        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+        "data": {
+          "entity": "Device",
+          "action": "Action",
+          "brightness": "Brightness % (lights only, with \"On\")",
+          "position": "Position % (covers only, with \"Set position\")"
+        }
+      }
+    }
+  },
+  "selector": {
+    "action": {
+      "options": {
+        "toggle": "Toggle",
+        "on": "On",
+        "off": "Off",
+        "open": "Open (cover)",
+        "close": "Close (cover)",
+        "position": "Set position (cover)"
+      }
+    }
+  }
+}
