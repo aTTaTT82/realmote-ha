@@ -1,6 +1,7 @@
 """RealMote – Tasten einer Funk-Fernbedienung auf HA-Geraete legen (per MQTT)."""
 from __future__ import annotations
 
+import json
 import logging
 
 from homeassistant.components import mqtt
@@ -14,6 +15,8 @@ from .const import (
     CONF_BRIGHTNESS,
     CONF_DEVICE_ID,
     CONF_ENTITY,
+    CONF_FW,
+    CONF_IP,
     CONF_NAME,
     CONF_POSITION,
     DEFAULT_BASE_TOPIC,
@@ -24,7 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Einen RealMote-Hub einrichten: MQTT-Taster-Event abonnieren."""
+    """Einen RealMote-Hub einrichten: MQTT-Taster-Event + Announce abonnieren."""
     if not await mqtt.async_wait_for_mqtt_client(hass):
         _LOGGER.error("MQTT ist nicht verfuegbar – RealMote braucht die MQTT-Integration")
         return False
@@ -32,6 +35,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     device_id: str = entry.data[CONF_DEVICE_ID]
     base: str = entry.data.get(CONF_BASE_TOPIC, DEFAULT_BASE_TOPIC)
     name: str = entry.data.get(CONF_NAME, device_id)
+    ip: str | None = entry.data.get(CONF_IP)
+    fw: str | None = entry.data.get(CONF_FW)
 
     dev_reg = dr.async_get(hass)
     dev_reg.async_get_or_create(
@@ -40,9 +45,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         manufacturer="RealMote",
         name=name,
         model="Universal Remote Hub",
+        sw_version=fw,
+        configuration_url=f"http://{ip}/" if ip else None,
     )
 
-    topic = f"{base}/{device_id}/button"
+    # Taster-Events -> Aktion ausfuehren
+    button_topic = f"{base}/{device_id}/button"
 
     @callback
     def _on_button(msg: mqtt.ReceiveMessage) -> None:
@@ -52,9 +60,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             return
         hass.async_create_task(_run_button(hass, entry, button))
 
-    unsub = await mqtt.async_subscribe(hass, topic, _on_button)
-    entry.async_on_unload(unsub)
-    _LOGGER.info("RealMote %s: hoere auf %s", device_id, topic)
+    entry.async_on_unload(await mqtt.async_subscribe(hass, button_topic, _on_button))
+
+    # Announce -> IP/Firmware live halten (DHCP-Wechsel, Firmware-Update)
+    announce_topic = f"{base}/{device_id}/announce"
+
+    @callback
+    def _on_announce(msg: mqtt.ReceiveMessage) -> None:
+        try:
+            data = json.loads(msg.payload)
+        except (ValueError, TypeError):
+            return
+        updates: dict = {}
+        if data.get("ip"):
+            updates["configuration_url"] = f"http://{data['ip']}/"
+        if data.get("fw"):
+            updates["sw_version"] = data["fw"]
+        if not updates:
+            return
+        device = dev_reg.async_get_device(identifiers={(DOMAIN, device_id)})
+        if device:
+            dev_reg.async_update_device(device.id, **updates)
+
+    entry.async_on_unload(await mqtt.async_subscribe(hass, announce_topic, _on_announce))
+
+    _LOGGER.info("RealMote %s: hoere auf %s", device_id, button_topic)
     return True
 
 

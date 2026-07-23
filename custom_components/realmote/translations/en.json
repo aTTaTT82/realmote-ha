@@ -23,16 +23,16 @@
   "options": {
     "step": {
       "init": {
-        "title": "Button assignment",
-        "description": "Pick a button to assign – or \"Done\".",
+        "title": "🎛️ Button assignment",
+        "description": "**Current assignment:**\n\n{overview}\n\nPick a button to change – or save with \"✅ Done\".",
         "menu_options": {
-          "button_1": "Button 1",
-          "button_2": "Button 2",
-          "button_3": "Button 3",
-          "button_4": "Button 4",
-          "button_5": "Button 5",
-          "button_6": "Button 6",
-          "finish": "Done"
+          "button_1": "🔘 Button 1",
+          "button_2": "🔘 Button 2",
+          "button_3": "🔘 Button 3",
+          "button_4": "🔘 Button 4",
+          "button_5": "🔘 Button 5",
+          "button_6": "🔘 Button 6",
+          "finish": "✅ Done & save"
         }
       },
       "button_1": {

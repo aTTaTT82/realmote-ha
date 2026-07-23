@@ -23,16 +23,16 @@
   "options": {
     "step": {
       "init": {
-        "title": "Tastenbelegung",
-        "description": "Wähle eine Taste zum Belegen – oder „Fertig“.",
+        "title": "🎛️ Tastenbelegung",
+        "description": "**Aktuelle Belegung:**\n\n{overview}\n\nWähle eine Taste zum Ändern – oder speichere mit „✅ Fertig“.",
         "menu_options": {
-          "button_1": "Taste 1",
-          "button_2": "Taste 2",
-          "button_3": "Taste 3",
-          "button_4": "Taste 4",
-          "button_5": "Taste 5",
-          "button_6": "Taste 6",
-          "finish": "Fertig"
+          "button_1": "🔘 Taste 1",
+          "button_2": "🔘 Taste 2",
+          "button_3": "🔘 Taste 3",
+          "button_4": "🔘 Taste 4",
+          "button_5": "🔘 Taste 5",
+          "button_6": "🔘 Taste 6",
+          "finish": "✅ Fertig & speichern"
         }
       },
       "button_1": {

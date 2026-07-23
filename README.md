@@ -1,4 +1,8 @@
-# RealMote – Home Assistant Integration
+<p align="center">
+  <img src="images/remote.svg" alt="RealMote" width="200">
+</p>
+
+<h1 align="center">RealMote – Home Assistant Integration</h1>
 
 Macht aus dem **RealMote Hub** (6-Tasten-Funk-Fernbedienung + ESP32-Hub) ein echtes
 Home-Assistant-Gerät: Du legst jede Taste direkt im Geräte-Menü auf ein beliebiges HA-Gerät
@@ -33,6 +37,12 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 | Öffnen / Schließen | Rollo/Cover | – |
 | Position setzen | Rollo/Cover | Position % |
 
+## Hub-Einstellungen
+Auf der **Geräteseite** in HA gibt es einen Link **„Gerät besuchen"** direkt zur
+Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wird ebenfalls
+angezeigt und bei jedem Announce aktuell gehalten.
+
 ## Status
-Prototyp (v0.1). Transport = MQTT. Firmware-Announce: `realmote/<id>/announce`,
-Taster-Event: `realmote/<id>/button` = Tastennummer.
+v0.2. Transport = MQTT. Firmware-Announce: `realmote/<id>/announce` (enthält `ip`, `fw`),
+Taster-Event: `realmote/<id>/button` = Tastennummer. Braucht Hub-Firmware **≥ 4.6.1**
+für den Geräte-Link.

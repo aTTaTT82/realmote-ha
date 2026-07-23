@@ -23,12 +23,24 @@ from .const import (
     CONF_BRIGHTNESS,
     CONF_DEVICE_ID,
     CONF_ENTITY,
+    CONF_FW,
+    CONF_IP,
     CONF_NAME,
     CONF_POSITION,
     DEFAULT_BASE_TOPIC,
     DOMAIN,
     NUM_BUTTONS,
 )
+
+# Nur fuer die Uebersicht/Anzeige (die echte Ausfuehrung mappt __init__.py)
+ACTION_LABELS = {
+    "toggle": "Umschalten",
+    "on": "An",
+    "off": "Aus",
+    "open": "Öffnen",
+    "close": "Schließen",
+    "position": "Position",
+}
 
 
 class RealMoteConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -59,6 +71,8 @@ class RealMoteConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_DEVICE_ID: device_id,
             CONF_NAME: data.get("name", device_id),
             CONF_BASE_TOPIC: data.get("base", DEFAULT_BASE_TOPIC),
+            CONF_IP: data.get("ip"),
+            CONF_FW: data.get("fw"),
         }
         self.context["title_placeholders"] = {"name": self._disc[CONF_NAME]}
         return await self.async_step_confirm()
@@ -117,13 +131,34 @@ class RealMoteOptionsFlow(OptionsFlow):
         self._entry = config_entry
         self._options: dict[str, Any] = dict(config_entry.options)
 
+    def _overview(self) -> str:
+        """Kompakte Uebersicht aller 6 Tasten fuer die Menue-Beschreibung."""
+        lines: list[str] = []
+        for i in range(1, NUM_BUTTONS + 1):
+            cfg = self._options.get(str(i))
+            if cfg and cfg.get(CONF_ENTITY):
+                ent = cfg[CONF_ENTITY]
+                state = self.hass.states.get(ent)
+                friendly = state.name if state else ent
+                act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
+                extra = ""
+                if cfg.get(CONF_BRIGHTNESS) is not None:
+                    extra = f" · {int(cfg[CONF_BRIGHTNESS])} %"
+                elif cfg.get(CONF_POSITION) is not None:
+                    extra = f" · {int(cfg[CONF_POSITION])} %"
+                lines.append(f"**{i}** · {friendly} → {act}{extra}")
+            else:
+                lines.append(f"**{i}** · —")
+        return "\n".join(lines)
+
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Menue: welche Taste belegen? (oder Fertig)."""
+        """Menue: welche Taste belegen? (oder Fertig). Zeigt die aktuelle Belegung."""
         return self.async_show_menu(
             step_id="init",
             menu_options=[f"button_{i}" for i in range(1, NUM_BUTTONS + 1)] + ["finish"],
+            description_placeholders={"overview": self._overview()},
         )
 
     async def async_step_finish(
