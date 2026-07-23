@@ -42,6 +42,22 @@ ACTION_LABELS = {
     "position": "Position",
 }
 
+# Emoji je Geraetetyp – macht die Uebersicht lebendiger
+DOMAIN_EMOJI = {
+    "light": "💡",
+    "switch": "🔌",
+    "cover": "🪟",
+    "media_player": "🔊",
+    "fan": "🌀",
+    "scene": "🎬",
+    "script": "▶️",
+    "climate": "🌡️",
+    "lock": "🔒",
+    "vacuum": "🧹",
+    "button": "🔘",
+    "input_boolean": "🔀",
+}
+
 
 class RealMoteConfigFlow(ConfigFlow, domain=DOMAIN):
     """Hub hinzufuegen – automatisch per MQTT-Announce oder manuell."""
@@ -140,15 +156,16 @@ class RealMoteOptionsFlow(OptionsFlow):
                 ent = cfg[CONF_ENTITY]
                 state = self.hass.states.get(ent)
                 friendly = state.name if state else ent
+                emoji = DOMAIN_EMOJI.get(ent.split(".")[0], "▫️")
                 act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
                 extra = ""
                 if cfg.get(CONF_BRIGHTNESS) is not None:
                     extra = f" · {int(cfg[CONF_BRIGHTNESS])} %"
                 elif cfg.get(CONF_POSITION) is not None:
                     extra = f" · {int(cfg[CONF_POSITION])} %"
-                lines.append(f"**{i}** · {friendly} → {act}{extra}")
+                lines.append(f"{emoji}  **Taste {i}** — {friendly} → _{act}{extra}_")
             else:
-                lines.append(f"**{i}** · —")
+                lines.append(f"⚪  **Taste {i}** — _frei_")
         return "\n".join(lines)
 
     async def async_step_init(
