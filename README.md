@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/remote.svg" alt="RealMote" width="200">
+  <img src="https://raw.githubusercontent.com/aTTaTT82/realmote-ha/main/images/remote.png" alt="RealMote" width="240">
 </p>
 
 <h1 align="center">RealMote – Home Assistant Integration</h1>
