@@ -43,6 +43,14 @@ Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wi
 angezeigt und bei jedem Announce aktuell gehalten.
 
 ## Status
-v0.2. Transport = MQTT. Firmware-Announce: `realmote/<id>/announce` (enthält `ip`, `fw`),
+v0.3. Transport = MQTT. Firmware-Announce: `realmote/<id>/announce` (enthält `ip`, `fw`),
 Taster-Event: `realmote/<id>/button` = Tastennummer. Braucht Hub-Firmware **≥ 4.6.1**
-für den Geräte-Link.
+für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Ordner geladen
+(kein `home-assistant/brands`-Eintrag nötig).
+
+### Änderungen
+- **0.3.1** – Kleinigkeiten & Doku.
+- **0.3.0** – Eigenes Marken-Icon + Logo (`brand/`-Ordner).
+- **0.2.3** – Tasten-Übersicht mit Gerätetyp-Emojis.
+- **0.2.2** – README-Bild als PNG.
+- **0.2.1** – Geräte-Link zur Hub-Weboberfläche, Remote-Grafik (3×2).
