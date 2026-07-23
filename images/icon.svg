@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect x="0" y="0" width="256" height="256" rx="56" fill="#242a38"/>
+  <rect x="7" y="7" width="242" height="242" rx="50" fill="none" stroke="#3d4557" stroke-width="2"/>
+  <!-- gruener Akzentbalken oben (Marke) -->
+  <rect x="94" y="42" width="68" height="9" rx="4.5" fill="#22c55e"/>
+  <!-- 3 x 2 Tasten, hell fuer Kontrast; Taste 1 gruen als Akzent -->
+  <g stroke="#12151c" stroke-width="2">
+    <circle cx="70"  cy="126" r="30" fill="#2fce77"/>
+    <circle cx="128" cy="126" r="30" fill="#9aa2b4"/>
+    <circle cx="186" cy="126" r="30" fill="#9aa2b4"/>
+    <circle cx="70"  cy="196" r="30" fill="#9aa2b4"/>
+    <circle cx="128" cy="196" r="30" fill="#9aa2b4"/>
+    <circle cx="186" cy="196" r="30" fill="#9aa2b4"/>
+  </g>
+</svg>
