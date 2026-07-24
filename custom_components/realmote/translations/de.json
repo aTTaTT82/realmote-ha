@@ -24,70 +24,26 @@
     "step": {
       "init": {
         "title": "🎛️ Tastenbelegung",
-        "description": "**Aktuelle Belegung:**\n\n{overview}\n\nWähle eine Taste zum Ändern – oder speichere mit „✅ Fertig“.",
+        "description": "{overview}\n\nWähle einen Eintrag zum Ändern – oder speichere mit „✅ Fertig“.",
         "menu_options": {
-          "button_1": "🔘 Taste 1",
-          "button_2": "🔘 Taste 2",
-          "button_3": "🔘 Taste 3",
-          "button_4": "🔘 Taste 4",
-          "button_5": "🔘 Taste 5",
-          "button_6": "🔘 Taste 6",
+          "button_1": "🔘 Taste 1 · kurz",
+          "button_2": "🔘 Taste 2 · kurz",
+          "button_3": "🔘 Taste 3 · kurz",
+          "button_4": "🔘 Taste 4 · kurz",
+          "button_5": "🔘 Taste 5 · kurz",
+          "button_6": "🔘 Taste 6 · kurz",
+          "hold_1": "⏱️ Taste 1 · lang halten",
+          "hold_2": "⏱️ Taste 2 · lang halten",
+          "hold_3": "⏱️ Taste 3 · lang halten",
+          "hold_4": "⏱️ Taste 4 · lang halten",
+          "hold_5": "⏱️ Taste 5 · lang halten",
+          "hold_6": "⏱️ Taste 6 · lang halten",
           "finish": "✅ Fertig & speichern"
         }
       },
-      "button_1": {
-        "title": "Taste 1 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
-        "data": {
-          "entity": "Gerät",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
-        }
-      },
-      "button_2": {
-        "title": "Taste 2 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
-        "data": {
-          "entity": "Gerät",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
-        }
-      },
-      "button_3": {
-        "title": "Taste 3 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
-        "data": {
-          "entity": "Gerät",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
-        }
-      },
-      "button_4": {
-        "title": "Taste 4 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
-        "data": {
-          "entity": "Gerät",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
-        }
-      },
-      "button_5": {
-        "title": "Taste 5 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
-        "data": {
-          "entity": "Gerät",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
-        }
-      },
-      "button_6": {
-        "title": "Taste 6 belegen",
-        "description": "Gerät und Aktion für Taste {button}. Feld „Gerät“ leer lassen = Taste löschen.",
+      "assign": {
+        "title": "Aktion festlegen",
+        "description": "**{label}** — Gerät & Aktion wählen. Feld „Gerät“ leer lassen = Aktion löschen.",
         "data": {
           "entity": "Gerät",
           "action": "Aktion",

@@ -49,6 +49,7 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.4.0** – Tippen **und** Halten pro Taste → 12 Aktionen (Hub-Firmware ≥ 4.7.0).
 - **0.3.1** – Kleinigkeiten & Doku.
 - **0.3.0** – Eigenes Marken-Icon + Logo (`brand/`-Ordner).
 - **0.2.3** – Tasten-Übersicht mit Gerätetyp-Emojis.

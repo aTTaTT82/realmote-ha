@@ -24,70 +24,26 @@
     "step": {
       "init": {
         "title": "🎛️ Button assignment",
-        "description": "**Current assignment:**\n\n{overview}\n\nPick a button to change – or save with \"✅ Done\".",
+        "description": "{overview}\n\nPick an entry to change – or save with \"✅ Done\".",
         "menu_options": {
-          "button_1": "🔘 Button 1",
-          "button_2": "🔘 Button 2",
-          "button_3": "🔘 Button 3",
-          "button_4": "🔘 Button 4",
-          "button_5": "🔘 Button 5",
-          "button_6": "🔘 Button 6",
+          "button_1": "🔘 Button 1 · tap",
+          "button_2": "🔘 Button 2 · tap",
+          "button_3": "🔘 Button 3 · tap",
+          "button_4": "🔘 Button 4 · tap",
+          "button_5": "🔘 Button 5 · tap",
+          "button_6": "🔘 Button 6 · tap",
+          "hold_1": "⏱️ Button 1 · hold",
+          "hold_2": "⏱️ Button 2 · hold",
+          "hold_3": "⏱️ Button 3 · hold",
+          "hold_4": "⏱️ Button 4 · hold",
+          "hold_5": "⏱️ Button 5 · hold",
+          "hold_6": "⏱️ Button 6 · hold",
           "finish": "✅ Done & save"
         }
       },
-      "button_1": {
-        "title": "Assign button 1",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
-        "data": {
-          "entity": "Device",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
-        }
-      },
-      "button_2": {
-        "title": "Assign button 2",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
-        "data": {
-          "entity": "Device",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
-        }
-      },
-      "button_3": {
-        "title": "Assign button 3",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
-        "data": {
-          "entity": "Device",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
-        }
-      },
-      "button_4": {
-        "title": "Assign button 4",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
-        "data": {
-          "entity": "Device",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
-        }
-      },
-      "button_5": {
-        "title": "Assign button 5",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
-        "data": {
-          "entity": "Device",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
-        }
-      },
-      "button_6": {
-        "title": "Assign button 6",
-        "description": "Device and action for button {button}. Leave \"Device\" empty to clear the button.",
+      "assign": {
+        "title": "Set action",
+        "description": "**{label}** — pick device & action. Leave \"Device\" empty to clear.",
         "data": {
           "entity": "Device",
           "action": "Action",

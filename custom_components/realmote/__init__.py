@@ -49,8 +49,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         configuration_url=f"http://{ip}/" if ip else None,
     )
 
-    # Taster-Events -> Aktion ausfuehren
+    # Taster-Events -> Aktion ausfuehren. Kurz = .../button, Lang halten = .../hold.
     button_topic = f"{base}/{device_id}/button"
+    hold_topic = f"{base}/{device_id}/hold"
 
     @callback
     def _on_button(msg: mqtt.ReceiveMessage) -> None:
@@ -58,9 +59,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             button = int(str(msg.payload).strip())
         except (ValueError, TypeError):
             return
-        hass.async_create_task(_run_button(hass, entry, button))
+        hass.async_create_task(_run_button(hass, entry, button, hold=False))
+
+    @callback
+    def _on_hold(msg: mqtt.ReceiveMessage) -> None:
+        try:
+            button = int(str(msg.payload).strip())
+        except (ValueError, TypeError):
+            return
+        hass.async_create_task(_run_button(hass, entry, button, hold=True))
 
     entry.async_on_unload(await mqtt.async_subscribe(hass, button_topic, _on_button))
+    entry.async_on_unload(await mqtt.async_subscribe(hass, hold_topic, _on_hold))
 
     # Announce -> IP/Firmware live halten (DHCP-Wechsel, Firmware-Update)
     announce_topic = f"{base}/{device_id}/announce"
@@ -88,11 +98,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def _run_button(hass: HomeAssistant, entry: ConfigEntry, button: int) -> None:
-    """Die fuer diese Taste hinterlegte Aktion ausfuehren."""
-    cfg = entry.options.get(str(button))
+async def _run_button(
+    hass: HomeAssistant, entry: ConfigEntry, button: int, hold: bool = False
+) -> None:
+    """Die fuer diese Taste (kurz/lang) hinterlegte Aktion ausfuehren."""
+    key = f"{button}h" if hold else str(button)  # kurz: "1".."6", lang: "1h".."6h"
+    cfg = entry.options.get(key)
     if not cfg or not cfg.get(CONF_ENTITY):
-        _LOGGER.debug("RealMote: Taste %s ist nicht belegt", button)
+        _LOGGER.debug("RealMote: Taste %s (%s) ist nicht belegt", button, "lang" if hold else "kurz")
         return
 
     entity_id: str = cfg[CONF_ENTITY]

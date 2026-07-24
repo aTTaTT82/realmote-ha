@@ -141,40 +141,46 @@ class RealMoteConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class RealMoteOptionsFlow(OptionsFlow):
-    """Tastenbelegung – pro Taste Geraet + Aktion (+ Helligkeit/Position)."""
+    """Tastenbelegung – je Taste eine KURZ- und eine LANG-Aktion (12 Slots)."""
 
     def __init__(self, config_entry: ConfigEntry) -> None:
         self._entry = config_entry
         self._options: dict[str, Any] = dict(config_entry.options)
+        self._pending: tuple[int, bool] = (1, False)  # (Tastennummer, lang?)
+
+    def _fmt(self, key: str, num: int) -> str:
+        """Eine Uebersichtszeile fuer einen Slot (kurz: "1", lang: "1h")."""
+        cfg = self._options.get(key)
+        if cfg and cfg.get(CONF_ENTITY):
+            ent = cfg[CONF_ENTITY]
+            state = self.hass.states.get(ent)
+            friendly = state.name if state else ent
+            emoji = DOMAIN_EMOJI.get(ent.split(".")[0], "▫️")
+            act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
+            extra = ""
+            if cfg.get(CONF_BRIGHTNESS) is not None:
+                extra = f" {int(cfg[CONF_BRIGHTNESS])} %"
+            elif cfg.get(CONF_POSITION) is not None:
+                extra = f" {int(cfg[CONF_POSITION])} %"
+            return f"{emoji} **{num}** {friendly} → _{act}{extra}_"
+        return f"⚪ **{num}** _frei_"
 
     def _overview(self) -> str:
-        """Kompakte Uebersicht aller 6 Tasten fuer die Menue-Beschreibung."""
-        lines: list[str] = []
-        for i in range(1, NUM_BUTTONS + 1):
-            cfg = self._options.get(str(i))
-            if cfg and cfg.get(CONF_ENTITY):
-                ent = cfg[CONF_ENTITY]
-                state = self.hass.states.get(ent)
-                friendly = state.name if state else ent
-                emoji = DOMAIN_EMOJI.get(ent.split(".")[0], "▫️")
-                act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
-                extra = ""
-                if cfg.get(CONF_BRIGHTNESS) is not None:
-                    extra = f" · {int(cfg[CONF_BRIGHTNESS])} %"
-                elif cfg.get(CONF_POSITION) is not None:
-                    extra = f" · {int(cfg[CONF_POSITION])} %"
-                lines.append(f"{emoji}  **Taste {i}** — {friendly} → _{act}{extra}_")
-            else:
-                lines.append(f"⚪  **Taste {i}** — _frei_")
-        return "\n".join(lines)
+        short = "\n".join(self._fmt(str(i), i) for i in range(1, NUM_BUTTONS + 1))
+        long = "\n".join(self._fmt(f"{i}h", i) for i in range(1, NUM_BUTTONS + 1))
+        return f"**Kurz tippen:**\n{short}\n\n**Lang halten:**\n{long}"
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Menue: welche Taste belegen? (oder Fertig). Zeigt die aktuelle Belegung."""
+        """Menue: welchen Slot belegen? (kurz 1-6, lang 1-6, oder Fertig)."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=[f"button_{i}" for i in range(1, NUM_BUTTONS + 1)] + ["finish"],
+            menu_options=(
+                [f"button_{i}" for i in range(1, NUM_BUTTONS + 1)]
+                + [f"hold_{i}" for i in range(1, NUM_BUTTONS + 1)]
+                + ["finish"]
+            ),
             description_placeholders={"overview": self._overview()},
         )
 
@@ -184,19 +190,26 @@ class RealMoteOptionsFlow(OptionsFlow):
         return self.async_create_entry(title="", data=self._options)
 
     def __getattr__(self, name: str):
-        """async_step_button_1 .. _6 auf einen gemeinsamen Handler routen."""
-        if name.startswith("async_step_button_"):
-            number = int(name.rsplit("_", 1)[1])
+        """Menue-Eintraege button_1..6 (kurz) + hold_1..6 (lang) auf ein Formular routen."""
+        for prefix, is_hold in (("async_step_button_", False), ("async_step_hold_", True)):
+            if name.startswith(prefix):
+                number = int(name.rsplit("_", 1)[1])
 
-            async def _step(user_input: dict[str, Any] | None = None):
-                return await self._configure_button(number, user_input)
+                async def _step(user_input: dict[str, Any] | None = None,
+                                _n: int = number, _h: bool = is_hold):
+                    self._pending = (_n, _h)
+                    return await self.async_step_assign()
 
-            return _step
+                return _step
         raise AttributeError(name)
 
-    async def _configure_button(
-        self, number: int, user_input: dict[str, Any] | None
+    async def async_step_assign(
+        self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        """Gemeinsames Formular fuer den gewaehlten Slot (self._pending)."""
+        number, hold = self._pending
+        key = f"{number}h" if hold else str(number)
+
         if user_input is not None:
             cfg: dict[str, Any] = {}
             if user_input.get(CONF_ENTITY):
@@ -207,12 +220,12 @@ class RealMoteOptionsFlow(OptionsFlow):
             if user_input.get(CONF_POSITION) is not None:
                 cfg[CONF_POSITION] = user_input[CONF_POSITION]
             if cfg.get(CONF_ENTITY):
-                self._options[str(number)] = cfg
+                self._options[key] = cfg
             else:
-                self._options.pop(str(number), None)  # leeres Feld = Taste loeschen
+                self._options.pop(key, None)  # leeres Feld = Slot loeschen
             return await self.async_step_init()
 
-        cur = self._options.get(str(number), {})
+        cur = self._options.get(key, {})
         schema = vol.Schema(
             {
                 vol.Optional(
@@ -247,8 +260,9 @@ class RealMoteOptionsFlow(OptionsFlow):
                 ),
             }
         )
+        label = f"Taste {number} " + ("(lang halten)" if hold else "(kurz tippen)")
         return self.async_show_form(
-            step_id=f"button_{number}",
+            step_id="assign",
             data_schema=schema,
-            description_placeholders={"button": str(number)},
+            description_placeholders={"label": label},
         )
