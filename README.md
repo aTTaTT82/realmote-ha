@@ -37,6 +37,17 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 | Öffnen / Schließen | Rollo/Cover | – |
 | Position setzen | Rollo/Cover | Position % |
 
+## 🎛️ Jede Taste als HA-Ereignis (Automationen auf ALLE Tasten)
+Ab v0.7.0 (+ Hub-Firmware ≥ 4.12.0) taucht **jede Taste der Fernbedienung** als
+**Ereignis-Entity** am RealMote-Gerät auf (z. B. „Taste Rot", „Taste Play",
+„Taste Kanal +", auch Activity- und Power-Tasten). Die Taste macht weiterhin ganz
+normal ihre Fernbedienungs-Funktion — das Ereignis kommt **zusätzlich**.
+
+Damit lassen sich beliebige Automationen bauen: *„Wenn Taste Blau gedrückt →
+Staubsauger starten"*, *„Wenn Taste Aus gedrückt → auch alle Lichter aus"*, usw.
+Trigger in HA: Automation → Auslöser → Entität → die gewünschte „Taste …"-Entity.
+(Die Smart-Home-Tasten 1–6 behalten ihre eigenen 12 Aktions-Slots.)
+
 ## ▶️ Hub-Activities aus HA starten (z. B. „Android TV")
 Ab v0.6.0 (+ Hub-Firmware ≥ 4.11.0) legt die Integration **Knopf-Entities** am
 RealMote-Gerät an: je Activity ein Knopf (Namen kommen vom Hub, z. B. „TV gucken",
@@ -78,6 +89,8 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.7.0** – 🎛️ **Jede Taste als Ereignis-Entity** (Farb-, Medien-, Navigations-,
+  Activity- und Power-Tasten) für freie Automationen. Braucht Hub-Firmware ≥ 4.12.0.
 - **0.6.0** – ▶️ **Activity-Knöpfe**: je Hub-Activity eine Button-Entity („TV gucken",
   „Android TV", „Musik", Namen live vom Hub) + „Alles aus" — für Skripte, Automationen,
   Dashboards. Braucht Hub-Firmware ≥ 4.11.0 (MQTT-Befehl `activity:N`).

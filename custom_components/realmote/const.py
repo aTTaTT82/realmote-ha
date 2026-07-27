@@ -13,7 +13,7 @@ DEFAULT_BASE_TOPIC = "realmote"
 NUM_BUTTONS = 6
 NUM_ACTIVITIES = 3
 
-PLATFORMS = ["button"]
+PLATFORMS = ["button", "event"]
 
 # Pro Taste konfigurierbare Felder
 CONF_ENTITY = "entity"
