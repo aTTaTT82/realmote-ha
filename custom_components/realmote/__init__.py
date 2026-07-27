@@ -11,6 +11,7 @@ from homeassistant.helpers import device_registry as dr
 
 from .const import (
     CONF_ACTION,
+    CONF_ACTS,
     CONF_BASE_TOPIC,
     CONF_BRIGHTNESS,
     CONF_DEVICE_ID,
@@ -21,6 +22,7 @@ from .const import (
     CONF_POSITION,
     DEFAULT_BASE_TOPIC,
     DOMAIN,
+    PLATFORMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -86,16 +88,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             updates["configuration_url"] = f"http://{data['ip']}/"
         if data.get("fw"):
             updates["sw_version"] = data["fw"]
-        if not updates:
-            return
-        device = dev_reg.async_get_device(identifiers={(DOMAIN, device_id)})
-        if device:
-            dev_reg.async_update_device(device.id, **updates)
+        if updates:
+            device = dev_reg.async_get_device(identifiers={(DOMAIN, device_id)})
+            if device:
+                dev_reg.async_update_device(device.id, **updates)
+        # Activity-Namen (Firmware >= 4.11.0) -> Knopf-Entities benennen sich danach.
+        # Nur bei Aenderung speichern; der Update-Listener laedt den Eintrag dann neu.
+        acts = data.get(CONF_ACTS)
+        if isinstance(acts, list) and acts and acts != entry.data.get(CONF_ACTS):
+            hass.config_entries.async_update_entry(
+                entry, data={**entry.data, CONF_ACTS: acts}
+            )
 
     entry.async_on_unload(await mqtt.async_subscribe(hass, announce_topic, _on_announce))
 
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
     _LOGGER.info("RealMote %s: hoere auf %s", device_id, button_topic)
     return True
+
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Eintrag neu laden, wenn sich Daten/Optionen aendern (z. B. neue Activity-Namen)."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def _run_button(
@@ -174,4 +190,4 @@ async def _run_button(
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Abmelden (unsubscribe passiert ueber entry.async_on_unload)."""
-    return True
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

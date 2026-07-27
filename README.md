@@ -37,6 +37,22 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 | Öffnen / Schließen | Rollo/Cover | – |
 | Position setzen | Rollo/Cover | Position % |
 
+## ▶️ Hub-Activities aus HA starten (z. B. „Android TV")
+Ab v0.6.0 (+ Hub-Firmware ≥ 4.11.0) legt die Integration **Knopf-Entities** am
+RealMote-Gerät an: je Activity ein Knopf (Namen kommen vom Hub, z. B. „TV gucken",
+„Android TV", „Musik") plus **„Alles aus"**. Ein Druck startet die komplette
+Activity auf dem Hub (TV an, HDMI-Eingang, Soundbar, Android-Wake, …).
+
+Damit lässt sich der Gerätestart in Szenen-Abläufe einbauen — als **Skript**:
+
+1. *Einstellungen → Automatisierungen & Szenen → Skripte → Skript hinzufügen*,
+   z. B. „Filmabend": Aktion 1 = Szene „Licht Filmabend" aktivieren,
+   Aktion 2 = Knopf „Android TV" drücken.
+2. Das Skript in RealMote auf eine Taste legen (Skripte sind direkt wählbar).
+
+Die Knöpfe funktionieren natürlich auch im Dashboard, in Automationen und per
+Sprachassistent.
+
 ## 🎬 Ganze Szenen auf eine Taste legen
 Im Feld **„Gerät / Szene / Skript"** kannst du auch eine **Szene** oder ein **Skript**
 auswählen — so legst du eine ganze Stimmung (mehrere Lampen, Rollos, Mediaplayer, …)
@@ -62,6 +78,9 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.6.0** – ▶️ **Activity-Knöpfe**: je Hub-Activity eine Button-Entity („TV gucken",
+  „Android TV", „Musik", Namen live vom Hub) + „Alles aus" — für Skripte, Automationen,
+  Dashboards. Braucht Hub-Firmware ≥ 4.11.0 (MQTT-Befehl `activity:N`).
 - **0.5.0** – 🎬 **Szenen, Skripte & Button-Entities auf Tasten legen** — Typ wird automatisch
   erkannt (Szene → aktivieren, Skript → starten, Button → drücken), Aktions-Auswahl kann
   nichts mehr falsch machen; Hinweis-Texte im Zuweisen-Dialog.
