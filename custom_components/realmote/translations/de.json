@@ -43,9 +43,9 @@
       },
       "assign": {
         "title": "Aktion festlegen",
-        "description": "**{label}** — Gerät & Aktion wählen. Feld „Gerät“ leer lassen = Aktion löschen.",
+        "description": "**{label}** — Gerät & Aktion wählen. Feld „Gerät“ leer lassen = Aktion löschen.\n\n💡 **Tipp:** Auch **Szenen** und **Skripte** sind hier wählbar — damit legst du eine ganze Stimmung (mehrere Lampen, Rollos, …) auf eine Taste. Szenen baust du unter *Einstellungen → Automatisierungen & Szenen → Szenen*; die „Aktion“ ist dabei egal, eine Szene wird immer aktiviert.",
         "data": {
-          "entity": "Gerät",
+          "entity": "Gerät / Szene / Skript",
           "action": "Aktion",
           "brightness": "Helligkeit % (nur Lampe bei „An“)",
           "position": "Position % (nur Rollo bei „Position setzen“)"

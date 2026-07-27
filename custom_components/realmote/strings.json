@@ -43,9 +43,9 @@
       },
       "assign": {
         "title": "Aktion festlegen",
-        "description": "**{label}** — Gerät & Aktion wählen. Feld „Gerät“ leer lassen = Aktion löschen.",
+        "description": "**{label}** — pick a target & action. Leave “Target” empty to clear the slot.\n\n💡 **Tip:** You can also pick **scenes** and **scripts** — putting a whole mood (multiple lights, covers, …) on one button. Build scenes under *Settings → Automations & Scenes → Scenes*; the chosen “action” is ignored, a scene is always activated.",
         "data": {
-          "entity": "Gerät",
+          "entity": "Target / scene / script",
           "action": "Aktion",
           "brightness": "Helligkeit % (nur Lampe bei „An“)",
           "position": "Position % (nur Rollo bei „Position setzen“)"

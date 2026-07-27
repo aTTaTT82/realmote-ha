@@ -155,8 +155,13 @@ class RealMoteOptionsFlow(OptionsFlow):
             ent = cfg[CONF_ENTITY]
             state = self.hass.states.get(ent)
             friendly = state.name if state else ent
-            emoji = DOMAIN_EMOJI.get(ent.split(".")[0], "▫️")
-            act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
+            ent_domain = ent.split(".")[0]
+            emoji = DOMAIN_EMOJI.get(ent_domain, "▫️")
+            if ent_domain in ("scene", "script", "button"):
+                # Diese Typen haben genau eine Aktion (siehe _run_button)
+                act = "Aktivieren"
+            else:
+                act = ACTION_LABELS.get(cfg.get(CONF_ACTION, "toggle"), cfg.get(CONF_ACTION))
             extra = ""
             if cfg.get(CONF_BRIGHTNESS) is not None:
                 extra = f" {int(cfg[CONF_BRIGHTNESS])} %"

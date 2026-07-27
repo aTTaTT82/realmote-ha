@@ -114,6 +114,24 @@ async def _run_button(
     _LOGGER.debug("RealMote: Taste %s -> %s auf %s", button, action, entity_id)
 
     try:
+        # Szenen, Skripte und Button-Entities haben genau EINE sinnvolle Aktion –
+        # die gewaehlte Aktion wird ignoriert, damit es fuer Laien immer "einfach geht".
+        if domain == "scene":
+            await hass.services.async_call(
+                "scene", "turn_on", {"entity_id": entity_id}, blocking=False
+            )
+            return
+        if domain == "script":
+            await hass.services.async_call(
+                "script", "turn_on", {"entity_id": entity_id}, blocking=False
+            )
+            return
+        if domain == "button":
+            await hass.services.async_call(
+                "button", "press", {"entity_id": entity_id}, blocking=False
+            )
+            return
+
         if action == "toggle":
             await hass.services.async_call(
                 "homeassistant", "toggle", {"entity_id": entity_id}, blocking=False

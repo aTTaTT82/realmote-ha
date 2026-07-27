@@ -43,9 +43,9 @@
       },
       "assign": {
         "title": "Set action",
-        "description": "**{label}** — pick device & action. Leave \"Device\" empty to clear.",
+        "description": "**{label}** — pick a target & action. Leave “Target” empty to clear the slot.\n\n💡 **Tip:** You can also pick **scenes** and **scripts** — putting a whole mood (multiple lights, covers, …) on one button. Build scenes under *Settings → Automations & Scenes → Scenes*; the chosen “action” is ignored, a scene is always activated.",
         "data": {
-          "entity": "Device",
+          "entity": "Target / scene / script",
           "action": "Action",
           "brightness": "Brightness % (lights only, with \"On\")",
           "position": "Position % (covers only, with \"Set position\")"

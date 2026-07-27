@@ -37,6 +37,19 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 | Öffnen / Schließen | Rollo/Cover | – |
 | Position setzen | Rollo/Cover | Position % |
 
+## 🎬 Ganze Szenen auf eine Taste legen
+Im Feld **„Gerät / Szene / Skript"** kannst du auch eine **Szene** oder ein **Skript**
+auswählen — so legst du eine ganze Stimmung (mehrere Lampen, Rollos, Mediaplayer, …)
+auf eine einzige Taste:
+
+1. Szene in HA zusammenstellen: **Einstellungen → Automatisierungen & Szenen → Szenen → Szene hinzufügen**
+   (Geräte reinziehen, gewünschte Zustände einstellen, speichern).
+2. In RealMote den Tasten-Slot öffnen und die Szene als Ziel wählen.
+
+Die „Aktion" ist dabei egal — Szenen werden **immer aktiviert**, Skripte **immer gestartet**,
+Button-Entities **immer gedrückt** (die Integration erkennt den Typ selbst, es kann nichts
+falsch eingestellt werden). Tipp: kurz tippen = Szene „Film", lang halten = Szene „Alles hell".
+
 ## Hub-Einstellungen
 Auf der **Geräteseite** in HA gibt es einen Link **„Gerät besuchen"** direkt zur
 Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wird ebenfalls
@@ -49,6 +62,9 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.5.0** – 🎬 **Szenen, Skripte & Button-Entities auf Tasten legen** — Typ wird automatisch
+  erkannt (Szene → aktivieren, Skript → starten, Button → drücken), Aktions-Auswahl kann
+  nichts mehr falsch machen; Hinweis-Texte im Zuweisen-Dialog.
 - **0.4.0** – Tippen **und** Halten pro Taste → 12 Aktionen (Hub-Firmware ≥ 4.7.0).
 - **0.3.1** – Kleinigkeiten & Doku.
 - **0.3.0** – Eigenes Marken-Icon + Logo (`brand/`-Ordner).
