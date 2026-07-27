@@ -37,6 +37,19 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 | Öffnen / Schließen | Rollo/Cover | – |
 | Position setzen | Rollo/Cover | Position % |
 
+## 🗣️ Tasten aus HA ausführen (z. B. „Alexa, Pause")
+Ab v0.8.0 (+ Hub-Firmware ≥ 4.13.0) gibt es am Gerät **drückbare Knöpfe für die
+einzelnen Tasten**: „Pause senden", „Play senden", „Lautstärke + senden", … Ein
+Druck wirkt **Activity-bewusst** wie ein Druck auf der Fernbedienung — „Pause"
+pausiert also genau das Gerät, das gerade die Wiedergabe macht.
+
+Standardmäßig sind die Medien-/Lautstärke-/Kanal-Tasten aktiv; selten gebrauchte
+(Farben, Navigation, HDMI, …) sind als Entity vorhanden, aber deaktiviert —
+einfach in HA bei Bedarf aktivieren.
+
+Für Sprachsteuerung: den gewünschten Knopf (z. B. „Pause senden") wie gewohnt an
+Alexa/Google durchreichen und eine Routine mit eigenem Sprachbefehl darauf legen.
+
 ## 🎛️ Jede Taste als HA-Ereignis (Automationen auf ALLE Tasten)
 Ab v0.7.0 (+ Hub-Firmware ≥ 4.12.0) taucht **jede Taste der Fernbedienung** als
 **Ereignis-Entity** am RealMote-Gerät auf (z. B. „Taste Rot", „Taste Play",
@@ -89,6 +102,9 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.8.0** – 🗣️ **Drückbare Tasten-Knöpfe** („Pause senden", …, Activity-bewusst) —
+  für Alexa-/Google-Routinen, Dashboards, Skripte. Braucht Hub-Firmware ≥ 4.13.0
+  (MQTT-Befehl `key:<NAME>`).
 - **0.7.0** – 🎛️ **Jede Taste als Ereignis-Entity** (Farb-, Medien-, Navigations-,
   Activity- und Power-Tasten) für freie Automationen. Braucht Hub-Firmware ≥ 4.12.0.
 - **0.6.0** – ▶️ **Activity-Knöpfe**: je Hub-Activity eine Button-Entity („TV gucken",
