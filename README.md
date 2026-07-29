@@ -90,6 +90,27 @@ Die „Aktion" ist dabei egal — Szenen werden **immer aktiviert**, Skripte **i
 Button-Entities **immer gedrückt** (die Integration erkennt den Typ selbst, es kann nichts
 falsch eingestellt werden). Tipp: kurz tippen = Szene „Film", lang halten = Szene „Alles hell".
 
+## ⬆️ Firmware-Update aus Home Assistant (v0.9.0)
+Der Hub erscheint jetzt unter **Einstellungen → Geräte & Dienste → Updates** wie jedes
+andere Gerät: Version, Änderungsprotokoll, ein Knopf **Installieren**.
+
+**Warum das nicht einfach der Hub selbst macht:** Beim Aufbau einer gesicherten Verbindung
+bleiben dem ESP32 nur rund **23 KB** freier Arbeitsspeicher. Das reicht heute — aber jede
+neue Funktion knabbert daran, und wenn es einmal nicht mehr reicht, könnte der Hub genau die
+Reparatur nicht mehr laden, die das beheben würde. Deshalb übernimmt Home Assistant den
+Internet-Teil: HA lädt Manifest und Firmware und **schiebt** die Datei über das lokale Netz
+an den Hub.
+
+**Sicher bleibt es trotzdem** — der Hub glaubt auch Home Assistant nicht:
+1. Die Manifest-Angaben werden gegen die eingebettete Signatur geprüft (ECDSA gegen den fest
+   in der Firmware verdrahteten Schlüssel).
+2. Die Build-Nummer muss größer sein als die laufende (keine Rückstufung auf alte Versionen).
+3. Das Abbild selbst wird gegen seine Signatur geprüft.
+
+Ein manipuliertes Manifest beantwortet der Hub mit einer Ablehnung. Braucht Hub-Firmware
+**≥ 4.19.1** (erst die meldet die Build-Nummer im Announce — ohne sie ließe sich innerhalb
+einer Version nicht erkennen, dass ein Update bereitliegt).
+
 ## Hub-Einstellungen
 Auf der **Geräteseite** in HA gibt es einen Link **„Gerät besuchen"** direkt zur
 Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wird ebenfalls
@@ -102,6 +123,10 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.9.0** – ⬆️ **Firmware-Update direkt aus HA**: Update-Entity mit Installieren-Knopf.
+  HA lädt die Firmware und schiebt sie an den Hub, weil dem Hub für den Download selbst
+  nur ~23 KB Reserve bleiben. Signaturprüfung und Rückstufungs-Sperre bleiben beim Hub.
+  Braucht Hub-Firmware ≥ 4.19.1.
 - **0.8.0** – 🗣️ **Drückbare Tasten-Knöpfe** („Pause senden", …, Activity-bewusst) —
   für Alexa-/Google-Routinen, Dashboards, Skripte. Braucht Hub-Firmware ≥ 4.13.0
   (MQTT-Befehl `key:<NAME>`).

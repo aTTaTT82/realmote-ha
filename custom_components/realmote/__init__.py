@@ -8,6 +8,7 @@ from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (
     CONF_ACTION,
@@ -23,6 +24,7 @@ from .const import (
     DEFAULT_BASE_TOPIC,
     DOMAIN,
     PLATFORMS,
+    SIGNAL_ANNOUNCE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -83,6 +85,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             data = json.loads(msg.payload)
         except (ValueError, TypeError):
             return
+        # Letzten Announce merken + Entities benachrichtigen. Die Update-Entity
+        # zieht daraus die laufende Version/Build und die IP des Hubs.
+        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = data
+        async_dispatcher_send(hass, f"{SIGNAL_ANNOUNCE}_{entry.entry_id}", data)
         updates: dict = {}
         if data.get("ip"):
             updates["configuration_url"] = f"http://{data['ip']}/"
