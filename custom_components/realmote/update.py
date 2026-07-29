@@ -122,9 +122,19 @@ class RealMoteUpdate(UpdateEntity):
 
     @property
     def latest_version(self) -> str | None:
-        # Solange nichts abgerufen wurde, den installierten Stand melden —
-        # sonst zeigt HA faelschlich ein Update an.
-        return self._latest or self.installed_version
+        """Neueste bekannte Version — oder None, wenn noch keine abgerufen wurde.
+
+        ⚠️ KEIN Rueckfall auf die installierte Version! Genau das stand hier
+        zuerst, und es war falsch: Beim Start fragt HA die Entity ab, BEVOR der
+        (retained) MQTT-Announce mit der Hub-IP verarbeitet ist. Ohne IP bricht
+        der Manifest-Abruf ab — mit Rueckfall meldete die Entity dann
+        "installiert == neueste", also dauerhaft "Aktuell", ganz unabhaengig
+        davon, ob ein Update bereitliegt. Ein Update-Hinweis, der nie erscheint,
+        ist schlimmer als gar keiner.
+        None laesst HA "unbekannt" anzeigen; sobald der Announce eintrifft,
+        loest _updated() eine echte Abfrage aus (siehe async_added_to_hass).
+        """
+        return self._latest
 
     @property
     def release_summary(self) -> str | None:
@@ -134,11 +144,20 @@ class RealMoteUpdate(UpdateEntity):
         return text[:255]                     # HA begrenzt die Zusammenfassung
 
     async def async_added_to_hass(self) -> None:
-        """Auf neue Announces horchen (Version aendert sich nach dem Update)."""
+        """Auf neue Announces horchen (Version aendert sich nach dem Update).
+
+        Der Announce bringt die Hub-IP — ohne sie ist kein Manifest-Abruf
+        moeglich. Beim Start trifft er typischerweise NACH der ersten Abfrage
+        ein, deshalb wird hier nachgeholt, solange noch kein Manifest vorliegt.
+        """
 
         @callback
         def _updated(_data: dict) -> None:
-            self.async_write_ha_state()
+            if self._manifest is None:
+                # Erster Announce: jetzt ist die IP bekannt -> echte Abfrage
+                self.async_schedule_update_ha_state(force_refresh=True)
+            else:
+                self.async_write_ha_state()
 
         self.async_on_remove(
             async_dispatcher_connect(

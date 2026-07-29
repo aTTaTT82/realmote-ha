@@ -123,6 +123,9 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.9.1** – Fix: Beim Start meldete die Firmware-Entität immer „Aktuell". Ursache: Sie
+  fragte ab, bevor der MQTT-Announce mit der Hub-IP da war, und meldete dann die installierte
+  Version als neueste. Jetzt wird die Abfrage nachgeholt, sobald der Announce eintrifft.
 - **0.9.0** – ⬆️ **Firmware-Update direkt aus HA**: Update-Entity mit Installieren-Knopf.
   HA lädt die Firmware und schiebt sie an den Hub, weil dem Hub für den Download selbst
   nur ~23 KB Reserve bleiben. Signaturprüfung und Rückstufungs-Sperre bleiben beim Hub.
