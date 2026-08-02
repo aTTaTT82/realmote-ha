@@ -111,6 +111,31 @@ Ein manipuliertes Manifest beantwortet der Hub mit einer Ablehnung. Braucht Hub-
 **≥ 4.19.1** (erst die meldet die Build-Nummer im Announce — ohne sie ließe sich innerhalb
 einer Version nicht erkennen, dass ein Update bereitliegt).
 
+## 🔋 Firmware der Fernbedienung aus Home Assistant (v0.10.0)
+Neben der Hub-Firmware steht jetzt eine zweite Update-Entität: **„Firmware der
+Fernbedienung"**. Sie zeigt, welche Version dort wirklich läuft, und welche veröffentlicht
+ist — und kann sie ausliefern.
+
+**Warum das vorher nicht ging:** Die Fernbedienung hängt nicht am Netz. Erreichbar ist sie
+nur über den Hub und dessen Funkstrecke, und bis Hub 4.29 wusste niemand, welche Version
+dort überhaupt läuft. Seit **Fernbedienung v3.9** meldet sie es von selbst — einmal je
+Wachphase, in einem reservierten Funkpaket **unveränderter Größe** (eine neue Paketgröße
+hätte alle Bestands-Fernbedienungen taub gemacht). Erst damit ist ein ehrliches
+„Update verfügbar" möglich statt eines Dauerhinweises.
+
+Arbeitsteilung wie bei der Hub-Firmware: HA holt das **signierte** Paket (`.rmf`) aus dem
+Internet und schiebt es ins lokale Netz an den Hub. Der Hub prüft die Signatur **beim
+Ablegen und noch einmal vor jedem Senden** — untergeschoben werden kann nichts.
+
+> ⚠️ **Der letzte Schritt liegt nicht bei Home Assistant.** Nach dem Installieren muss an
+> der Fernbedienung **eine beliebige Taste** gedrückt werden. Sie schläft bei 75 µA und ist
+> für den Hub nicht anrufbar; sie horcht von sich aus nach, sobald sie benutzt wird. Die
+> Versionsanzeige wechselt deshalb erst danach.
+
+Braucht Hub-Firmware **≥ 4.29.0** (Endpunkt `/remotefwlatest`) und für die Versionsanzeige
+Fernbedienung **≥ v3.9**. Fehlt eines von beidem, bleibt die Entität bewusst auf
+„unbekannt", statt etwas zu behaupten.
+
 ## Hub-Einstellungen
 Auf der **Geräteseite** in HA gibt es einen Link **„Gerät besuchen"** direkt zur
 Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wird ebenfalls
@@ -123,6 +148,10 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.10.0** – 🔋 **Firmware der Fernbedienung aus HA**: zweite Update-Entität mit
+  Installieren-Knopf. Zeigt laufende gegen veröffentlichte Version (Fernbedienung meldet
+  ihre Version ab v3.9) und liefert das signierte `.rmf` über den Hub per Funk aus.
+  Der letzte Schritt bleibt ein Tastendruck an der Fernbedienung. Braucht Hub ≥ 4.29.0.
 - **0.9.1** – Fix: Beim Start meldete die Firmware-Entität immer „Aktuell". Ursache: Sie
   fragte ab, bevor der MQTT-Announce mit der Hub-IP da war, und meldete dann die installierte
   Version als neueste. Jetzt wird die Abfrage nachgeholt, sobald der Announce eintrifft.

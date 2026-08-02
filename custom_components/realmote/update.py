@@ -66,8 +66,8 @@ PUSH_TIMEOUT = 300                      # Uebertragung an den Hub (~15 s gemesse
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Die Update-Entity fuer diesen Hub anlegen."""
-    async_add_entities([RealMoteUpdate(hass, entry)])
+    """Die Update-Entities anlegen: Hub-Firmware und Fernbedienungs-Firmware."""
+    async_add_entities([RealMoteUpdate(hass, entry), RealMoteRemoteUpdate(hass, entry)])
 
 
 def _version_string(fw: str | None, build: int | None) -> str | None:
@@ -269,4 +269,202 @@ class RealMoteUpdate(UpdateEntity):
         finally:
             self._attr_in_progress = False
             self._attr_update_percentage = None
+            self.async_write_ha_state()
+
+
+class RealMoteRemoteUpdate(UpdateEntity):
+    """Firmware der FERNBEDIENUNG — anzeigen und per Funk ausliefern.
+
+    WARUM EINE ZWEITE ENTITY
+    ------------------------
+    Die Fernbedienung haengt nicht am Netz; erreichbar ist sie nur ueber den Hub
+    und dessen Funkstrecke. Bis Hub 4.29.x wusste ausserdem niemand, welche
+    Version dort ueberhaupt laeuft — seit Remote v3.9 meldet sie es (einmal je
+    Wachphase, im Akku-Byte eines reservierten Pakets). Erst damit ist ein
+    ehrliches "Update verfuegbar" moeglich statt eines Dauerhinweises.
+
+    Arbeitsteilung wie bei der Hub-Firmware: HA holt das signierte Paket aus dem
+    Internet und schiebt es ins lokale Netz an den Hub. Der Hub prueft die
+    Signatur beim Ablegen UND noch einmal vor jedem Senden — HA kann nichts
+    unterschieben.
+
+    ⚠️ Der letzte Schritt liegt NICHT bei HA: nach dem Bereitstellen muss an der
+    Fernbedienung eine beliebige Taste gedrueckt werden. Sie schlaeft bei 75 uA
+    und ist fuer den Hub nicht anrufbar; sie horcht von sich aus nach, sobald
+    sie benutzt wird. Deshalb meldet install() Erfolg, sobald das Paket
+    scharfgestellt ist, und die Version wechselt erst spaeter.
+
+    Voraussetzungen: Hub-Firmware >= 4.29.0 (Endpunkt /remotefwlatest),
+    Fernbedienung >= v3.9 fuer die Versionsmeldung. Fehlt eines von beidem,
+    bleibt die Entity bewusst auf "unbekannt", statt etwas zu behaupten.
+    """
+
+    _attr_has_entity_name = True
+    _attr_name = "Firmware der Fernbedienung"
+    _attr_device_class = UpdateDeviceClass.FIRMWARE
+    _attr_supported_features = UpdateEntityFeature.INSTALL
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        self.hass = hass
+        self._entry = entry
+        self._device_id: str = entry.data[CONF_DEVICE_ID]
+        self._attr_unique_id = f"{self._device_id}_remote_firmware"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, self._device_id)},
+            name=entry.data.get(CONF_NAME, self._device_id),
+        )
+        self._state: dict | None = None
+
+    # ---------------------------------------------------------------- Zustand
+
+    @property
+    def _hub_ip(self) -> str | None:
+        ann = self.hass.data.get(DOMAIN, {}).get(self._entry.entry_id, {})
+        return ann.get("ip") or self._entry.data.get(CONF_IP)
+
+    @property
+    def installed_version(self) -> str | None:
+        """Was auf der Fernbedienung laeuft — None, solange sie nichts gemeldet hat.
+
+        ⚠️ Kein Rueckfall auf die veroeffentlichte Version. Derselbe Fehler wie
+        bei der Hub-Entity waere hier noch unangenehmer: die Anzeige stuende
+        dauerhaft auf "aktuell", obwohl niemand weiss, was dort laeuft.
+        """
+        if not self._state:
+            return None
+        return self._state.get("running_version") if self._state.get("running_code") else None
+
+    @property
+    def latest_version(self) -> str | None:
+        if not self._state or not self._state.get("published"):
+            return None
+        return self._state.get("latest_version")
+
+    @property
+    def available(self) -> bool:
+        return self._state is not None
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        if not self._state:
+            return None
+        return {
+            "hinweis": (
+                "Nach dem Installieren eine beliebige Taste auf der Fernbedienung "
+                "druecken — sie holt das Update dann selbst ab."
+            ),
+        }
+
+    async def async_added_to_hass(self) -> None:
+        """Der Announce bringt die Hub-IP; ohne sie ist keine Abfrage moeglich."""
+
+        @callback
+        def _updated(_data: dict) -> None:
+            if self._state is None:
+                self.async_schedule_update_ha_state(force_refresh=True)
+            else:
+                self.async_write_ha_state()
+
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, f"{SIGNAL_ANNOUNCE}_{self._entry.entry_id}", _updated
+            )
+        )
+
+    # ---------------------------------------------------------------- Abfrage
+
+    async def async_update(self) -> None:
+        """Den Hub fragen: was laeuft, was ist veroeffentlicht?
+
+        Eine Abfrage genuegt — der Hub hat den Manifest-Block schon geprueft
+        (inkl. Signatur) und kennt die laufende Version aus dem Funkverkehr.
+        """
+        ip = self._hub_ip
+        if not ip:
+            return
+        try:
+            session = async_get_clientsession(self.hass)
+            async with asyncio.timeout(15):
+                async with session.get(f"http://{ip}/remotefwlatest") as resp:
+                    if resp.status == 404:
+                        # Hub aelter als 4.29.0 — die Entity bleibt still.
+                        return
+                    resp.raise_for_status()
+                    self._state = await resp.json(content_type=None)
+        except Exception as err:  # noqa: BLE001 – Abruf darf die Entity nie killen
+            _LOGGER.debug("RealMote: /remotefwlatest nicht abrufbar: %s", err)
+
+    # ------------------------------------------------------------ Installieren
+
+    async def async_install(self, version: str | None, backup: bool, **kwargs) -> None:
+        """Paket holen, an den Hub schieben, bereitstellen."""
+        ip = self._hub_ip
+        if not ip:
+            raise HomeAssistantError("IP des Hubs unbekannt – Update nicht moeglich")
+        if not self._state:
+            await self.async_update()
+        st = self._state
+        if not st or not st.get("published"):
+            raise HomeAssistantError(
+                "Der Hub kennt keine veroeffentlichte Fernbedienungs-Firmware. "
+                "Er sieht taeglich nach; erzwingen laesst es sich mit einem Aufruf "
+                "von /updatecheck."
+            )
+
+        url = st.get("url")
+        code = st.get("latest_code")
+        if not url:
+            raise HomeAssistantError("Im Manifest fehlt die Adresse des Pakets")
+
+        session = async_get_clientsession(self.hass)
+        self._attr_in_progress = True
+        self.async_write_ha_state()
+        try:
+            _LOGGER.info("RealMote: lade Fernbedienungs-Firmware %s", url)
+            async with asyncio.timeout(DOWNLOAD_TIMEOUT):
+                async with session.get(url) as resp:
+                    resp.raise_for_status()
+                    payload = await resp.read()
+
+            erwartet = int(st.get("size") or 0)
+            if erwartet and len(payload) != erwartet:
+                raise HomeAssistantError(
+                    f"Heruntergeladenes Paket ist unvollstaendig "
+                    f"({len(payload)} statt {erwartet} Bytes)"
+                )
+
+            # ?code= sagt dem Hub, WELCHE Version er ablegt. Ohne diese Angabe
+            # weiss er es nicht und koennte spaeter nicht warnen, dass ein
+            # veraltetes Paket bereitliegt — genau das ist am 02.08.2026
+            # passiert und hat der Fernbedienung dieselbe Version ein zweites
+            # Mal beschert.
+            params = {"code": str(code)} if code else {}
+            form = aiohttp.FormData()
+            form.add_field("file", payload, filename="remote.rmf",
+                           content_type="application/octet-stream")
+
+            _LOGGER.info("RealMote: uebertrage %d Bytes an %s", len(payload), ip)
+            async with asyncio.timeout(PUSH_TIMEOUT):
+                async with session.post(
+                    f"http://{ip}/remotefw", params=params, data=form
+                ) as resp:
+                    body = (await resp.text()).strip()
+                    if resp.status != 200:
+                        # Der Hub lehnt hier u. a. eine ungueltige Signatur ab.
+                        raise HomeAssistantError(f"Hub hat abgelehnt ({resp.status}): {body}")
+
+            # Scharfstellen. Erst danach holt die Fernbedienung es beim naechsten
+            # Tastendruck ab — diesen letzten Schritt kann HA nicht ausloesen.
+            async with asyncio.timeout(30):
+                async with session.post(f"http://{ip}/remoteota") as resp:
+                    body = (await resp.text()).strip()
+                    if resp.status != 200:
+                        raise HomeAssistantError(f"Bereitstellen fehlgeschlagen: {body}")
+
+            _LOGGER.info(
+                "RealMote: Fernbedienungs-Firmware bereitgestellt. "
+                "Jetzt eine beliebige Taste an der Fernbedienung druecken."
+            )
+        finally:
+            self._attr_in_progress = False
             self.async_write_ha_state()
