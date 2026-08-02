@@ -24,6 +24,29 @@ Hub mit HTTP 403.
 Voraussetzung fuer die Anzeige der richtigen Version: Hub-Firmware >= 4.19.1,
 denn erst die meldet die Build-Nummer im Announce. Ohne sie liesse sich
 innerhalb einer Version (4.19.0 Build 526..530) kein Update erkennen.
+
+WARUM-GANZ-OBEN (v0.11.0)
+-------------------------
+Beide Firmware-Entities standen bis v0.10.0 ganz unten auf der Geraeteseite.
+Grund ist kein Zufall: `UpdateEntity` gibt sich per Vorgabe
+`EntityCategory.CONFIG` (Home-Assistant-Quelltext, update/__init__.py) -- und
+Konfigurations-Entities rendert HA in einer EIGENEN Karte, unterhalb der
+Bedienelemente. Bei einem Geraet mit Activity-Knoepfen, Tasten-Knoepfen und
+Ereignis-Entities fuer JEDE Taste liegt diese Karte sehr weit unten.
+
+Zwei Hebel, mehr gibt HA nicht her:
+  1. `_attr_entity_category = None` -> raus aus der Konfigurations-Karte,
+     hinein in die oberste Karte (Bedienelemente).
+  2. Innerhalb einer Karte sortiert HA **alphabetisch**; eine explizite
+     Reihenfolge gibt es nicht. Deshalb heissen beide jetzt
+     "Aktualisierung ..." -- das sortiert vor "Alles aus", "Android TV" und
+     allem "... senden", und die beiden stehen direkt nebeneinander.
+
+⚠️ Wer sie spaeter umbenennt, schiebt sie damit wieder nach hinten. Der Name
+ist hier kein Geschmack, sondern die Sortierung.
+⚠️ Nebenwirkung von (1): ohne Kategorie gelten sie als normale Entities und
+tauchen dadurch auch in automatisch erzeugten Uebersichten auf. Das ist genau
+das, was hier gewuenscht war (sichtbarer), aber es ist eine Aenderung.
 """
 from __future__ import annotations
 
@@ -85,8 +108,10 @@ class RealMoteUpdate(UpdateEntity):
     """Zeigt die Hub-Firmware an und installiert sie im Auftrag des Nutzers."""
 
     _attr_has_entity_name = True
-    _attr_name = "Firmware"
+    _attr_name = "Aktualisierung Hub"
     _attr_device_class = UpdateDeviceClass.FIRMWARE
+    # Siehe WARUM-GANZ-OBEN oben in dieser Datei.
+    _attr_entity_category = None
     _attr_supported_features = (
         UpdateEntityFeature.INSTALL | UpdateEntityFeature.PROGRESS
     )
@@ -300,8 +325,10 @@ class RealMoteRemoteUpdate(UpdateEntity):
     """
 
     _attr_has_entity_name = True
-    _attr_name = "Firmware der Fernbedienung"
+    _attr_name = "Aktualisierung Fernbedienung"
     _attr_device_class = UpdateDeviceClass.FIRMWARE
+    # Siehe WARUM-GANZ-OBEN oben in dieser Datei.
+    _attr_entity_category = None
     _attr_supported_features = UpdateEntityFeature.INSTALL
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:

@@ -148,6 +148,13 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.11.0** – ⬆️ Beide Firmware-Anzeigen stehen jetzt **ganz oben** auf der Geräteseite.
+  Sie lagen unten, weil `UpdateEntity` sich in Home Assistant von Haus aus die Kategorie
+  „Konfiguration" gibt und HA solche Entitäten in eine eigene Karte unter die
+  Bedienelemente schiebt. Kategorie entfernt – und weil HA innerhalb einer Karte nur
+  alphabetisch sortiert, heißen sie jetzt **„Aktualisierung Fernbedienung"** und
+  **„Aktualisierung Hub"**. Das sortiert vor „Alles aus" und allen Tasten-Knöpfen.
+  ⚠️ Wer sie umbenennt, schiebt sie wieder nach hinten – der Name *ist* die Sortierung.
 - **0.10.0** – 🔋 **Firmware der Fernbedienung aus HA**: zweite Update-Entität mit
   Installieren-Knopf. Zeigt laufende gegen veröffentlichte Version (Fernbedienung meldet
   ihre Version ab v3.9) und liefert das signierte `.rmf` über den Hub per Funk aus.
