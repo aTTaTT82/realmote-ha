@@ -1,15 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <rect x="0" y="0" width="256" height="256" rx="56" fill="#242a38"/>
-  <rect x="7" y="7" width="242" height="242" rx="50" fill="none" stroke="#3d4557" stroke-width="2"/>
-  <!-- gruener Akzentbalken oben (Marke) -->
-  <rect x="94" y="42" width="68" height="9" rx="4.5" fill="#22c55e"/>
-  <!-- 3 x 2 Tasten, hell fuer Kontrast; Taste 1 gruen als Akzent -->
-  <g stroke="#12151c" stroke-width="2">
-    <circle cx="70"  cy="126" r="30" fill="#2fce77"/>
-    <circle cx="128" cy="126" r="30" fill="#9aa2b4"/>
-    <circle cx="186" cy="126" r="30" fill="#9aa2b4"/>
-    <circle cx="70"  cy="196" r="30" fill="#9aa2b4"/>
-    <circle cx="128" cy="196" r="30" fill="#9aa2b4"/>
-    <circle cx="186" cy="196" r="30" fill="#9aa2b4"/>
-  </g>
-</svg>
+<!-- RealMote. Erzeugt aus design/marke/realmote-marke.svg; die
+     Rasterfassungen kommen aus tools/make-marke.py. Beim Aendern BEIDE
+     Wege nachziehen, sonst driften Vektor und Pixel auseinander. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" rx="56" fill="#000"/><g transform="translate(25.6 25.6) scale(8.533)"><g fill="#D2D9E0" fill-rule="evenodd" stroke="none"><path d="M5.35 2.2h.7a2.75 2.75 0 0 1 2.75 2.75v14.1a2.75 2.75 0 0 1-2.75 2.75h-.7A2.75 2.75 0 0 1 2.6 19.05V4.95A2.75 2.75 0 0 1 5.35 2.2zM5.7 4.7a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5zM4.75 8.9h1.9a.5.5 0 0 1 0 1h-1.9a.5.5 0 0 1 0-1zM5.7 11.8a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2zM4.75 17.5h1.9a.5.5 0 0 1 0 1h-1.9a.5.5 0 0 1 0-1z"/><path d="M9.35 2.2h3.15a5.35 5.35 0 0 1 0 10.7H9.35V9.15h3.15a1.8 1.8 0 0 0 0-3.6H9.35z"/><path d="M11.75 12.9h3.95l3.35 8.9h-3.95z"/></g><g fill="none" stroke="#3E9BF5" stroke-width="1.6" stroke-linecap="round"><path d="M17.7 5.3a5 5 0 0 1 0 6.4"/><path d="M20.2 3.5a8.2 8.2 0 0 1 0 10"/></g></g></svg>

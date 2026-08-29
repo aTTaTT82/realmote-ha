@@ -148,6 +148,12 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.12.0** – 🎨 **Das echte RealMote-Logo** statt der gezeichneten Sechs-Tasten-Grafik.
+  `brand/` und `images/` sind neu erzeugt; `logo.png` (heller Grund) trägt die Wortmarke
+  in Graphit, `dark_logo.png` in Silber — das Blau bleibt in beiden, es trägt auf jedem
+  Untergrund. Die Kachel bleibt in **beiden** Fassungen schwarz: ein erster Anlauf färbte
+  sie mit um, dann stand ein dunkles R auf dunkelgrauem Grund.
+  Erzeugt von `tools/make-marke.py --ha` im Hauptrepo — nicht von Hand nachziehen.
 - **0.11.0** – ⬆️ Beide Firmware-Anzeigen stehen jetzt **ganz oben** auf der Geräteseite.
   Sie lagen unten, weil `UpdateEntity` sich in Home Assistant von Haus aus die Kategorie
   „Konfiguration" gibt und HA solche Entitäten in eine eigene Karte unter die
