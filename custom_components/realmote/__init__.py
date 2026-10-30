@@ -10,6 +10,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
+from .zustand import ZustandMelder
+
 from .const import (
     CONF_ACTION,
     CONF_ACTS,
@@ -18,6 +20,7 @@ from .const import (
     CONF_DEVICE_ID,
     CONF_EIGEN,
     CONF_ENTITY,
+    CONF_GERAETE,
     CONF_FW,
     CONF_IP,
     CONF_NAME,
@@ -133,7 +136,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await mqtt.async_subscribe(hass, f"{base}/{device_id}/tasten", _on_tasten)
     )
 
+    # Eingerichtete Geraete mit Namen (Firmware >= 4.81.64, retained): [{"g":"tv","n":"Fernseher"},...] -- fuer die
+    # Auswahl in den Optionen "Zustand aus Home Assistant". Wie oben nur bei Aenderung speichern.
+    @callback
+    def _on_geraete(msg: mqtt.ReceiveMessage) -> None:
+        try:
+            geraete = json.loads(msg.payload)
+        except (ValueError, TypeError):
+            return
+        if isinstance(geraete, list) and geraete != entry.data.get(CONF_GERAETE, []):
+            hass.config_entries.async_update_entry(
+                entry, data={**entry.data, CONF_GERAETE: geraete}
+            )
+
+    entry.async_on_unload(
+        await mqtt.async_subscribe(hass, f"{base}/{device_id}/geraete", _on_geraete)
+    )
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Zustand der Geraete aus Home Assistant an den Hub (v0.14.0) -- nur mit Zuordnung in den Optionen. Ein Fehler hier
+    # darf die Einrichtung nicht scheitern lassen: sonst waeren auch die Smart-Home-Tasten tot
+    try:
+        await ZustandMelder(hass, entry).async_start()
+    except Exception:  # noqa: BLE001
+        _LOGGER.exception("RealMote: Zustand aus Home Assistant laesst sich nicht starten")
 
     _LOGGER.info("RealMote %s: hoere auf %s", device_id, button_topic)
     return True

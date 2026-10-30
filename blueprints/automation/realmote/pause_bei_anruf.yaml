@@ -1,0 +1,98 @@
+blueprint:
+  name: "RealMote: Pause bei Anruf"
+  description: >-
+    Klingelt dein Handy, pausiert der RealMote-Hub die Wiedergabe – nur, wenn gerade eine Aktivität läuft.
+    Auf Wunsch spielt er nach dem Gespräch weiter. Braucht den Sensor „Telefonstatus“ der Home-Assistant-App
+    (gibt es nur unter Android) und die RealMote-Integration ab 0.14.0 (Hub-Firmware ab 4.81.64).
+  domain: automation
+  author: RealMote
+  source_url: https://github.com/aTTaTT82/realmote-ha/blob/main/blueprints/automation/realmote/pause_bei_anruf.yaml
+  homeassistant:
+    min_version: "2024.10.0"
+  input:
+    telefon:
+      name: Telefonstatus
+      description: Der Sensor „Telefonstatus“ deines Handys aus der Home-Assistant-App (Zustände idle, ringing, offhook).
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+    aktivitaet_entity:
+      name: RealMote-Hub
+      description: Die Auswahl „Aktivität“ deines Hubs – pausiert wird nur, wenn nicht „Aus“.
+      selector:
+        entity:
+          filter:
+            - domain: select
+              integration: realmote
+    pause_knopf:
+      name: Knopf „Pause senden“
+      selector:
+        entity:
+          filter:
+            - domain: button
+              integration: realmote
+    weiter:
+      name: Nach dem Gespräch weiterspielen
+      default: false
+      selector:
+        boolean: {}
+    play_knopf:
+      name: Knopf „Play senden“
+      description: Nur nötig, wenn nach dem Gespräch weitergespielt werden soll.
+      default: ""
+      selector:
+        entity:
+          filter:
+            - domain: button
+              integration: realmote
+
+mode: queued
+max_exceeded: silent
+
+variables:
+  play_knopf: !input play_knopf
+
+triggers:
+  - trigger: state
+    entity_id: !input telefon
+    to: ringing
+    id: klingelt
+  - trigger: state
+    entity_id: !input telefon
+    from:
+      - ringing
+      - offhook
+    to: idle
+    id: aufgelegt
+    enabled: !input weiter
+
+conditions:
+  # eine Aktivitaet laeuft -- nicht "Aus" und nicht gerade unbekannt (waehrend die Integration neu laedt)
+  - condition: not
+    conditions:
+      - condition: state
+        entity_id: !input aktivitaet_entity
+        state:
+          - Aus
+          - unavailable
+          - unknown
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: klingelt
+        sequence:
+          - action: button.press
+            target:
+              entity_id: !input pause_knopf
+      - conditions:
+          - condition: trigger
+            id: aufgelegt
+          - condition: template
+            value_template: "{{ play_knopf | length > 0 }}"
+        sequence:
+          - action: button.press
+            target:
+              entity_id: "{{ play_knopf }}"

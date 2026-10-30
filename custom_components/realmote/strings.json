@@ -38,6 +38,7 @@
           "hold_4": "⏱️ Taste 4 · lang halten",
           "hold_5": "⏱️ Taste 5 · lang halten",
           "hold_6": "⏱️ Taste 6 · lang halten",
+          "zustand": "🔌 Zustand der Geräte aus Home Assistant",
           "finish": "✅ Fertig & speichern"
         }
       },
@@ -49,6 +50,26 @@
           "action": "Aktion",
           "brightness": "Helligkeit % (nur Lampe bei „An“)",
           "position": "Position % (nur Rollo bei „Position setzen“)"
+        }
+      },
+      "zustand": {
+        "title": "🔌 Zustand aus Home Assistant",
+        "description": "Der Hub merkt sich nur, was er selbst geschaltet hat. Geht ein Gerät von selbst aus oder nimmt jemand die Original-Fernbedienung, schaltet der nächste Wechsel verkehrt herum. Kennt Home Assistant den echten Zustand (Mediaplayer, Steckdose mit Strommessung, Sensor), übernimmt der Hub ihn.\n\nWelches Gerät des Hubs?",
+        "data": {
+          "geraet": "Gerät des Hubs"
+        }
+      },
+      "zustand_assign": {
+        "title": "Zustand für {geraet}",
+        "description": "**{geraet}** — welche Entität kennt den echten Zustand? Feld leer lassen = Zuordnung löschen.\n\n💡 Am zuverlässigsten ist eine **Steckdose mit Strommessung** (Leistung in W) oder der Mediaplayer des Geräts selbst. Ein Mediaplayer, der „nicht verfügbar“ zeigt, wenn das Gerät aus ist, hilft nicht.",
+        "data": {
+          "entity": "Entität mit dem Zustand",
+          "nachfassen": "Nachfassen",
+          "schwelle": "Schwelle (nur Leistungs-Sensor)"
+        },
+        "data_description": {
+          "nachfassen": "10 Sekunden nach dem Ein- oder Ausschalten fragt der Hub nach. Stimmt der Zustand nicht, schickt er den Befehl einmal noch. Nur einschalten, wenn die Entität schnell und zuverlässig meldet – sonst schaltet der Hub ein Gerät, das noch hochfährt, wieder aus.",
+          "schwelle": "Ab dieser Leistung gilt das Gerät als an (Fernseher im Standby: unter 1 W)."
         }
       }
     }

@@ -1,0 +1,61 @@
+blueprint:
+  name: "RealMote: Alles aus, wenn niemand zu Hause ist"
+  description: >-
+    Ist eine Weile niemand mehr zu Hause, schaltet der RealMote-Hub alles aus – Fernseher, Soundbar und die
+    übrigen Geräte der laufenden Aktivität. Läuft nichts, passiert nichts. Braucht Personen in Home Assistant,
+    deren Standort bekannt ist, und die RealMote-Integration ab 0.14.0 (Hub-Firmware ab 4.81.64).
+  domain: automation
+  author: RealMote
+  source_url: https://github.com/aTTaTT82/realmote-ha/blob/main/blueprints/automation/realmote/niemand_zuhause_alles_aus.yaml
+  homeassistant:
+    min_version: "2024.10.0"
+  input:
+    aktivitaet_entity:
+      name: RealMote-Hub
+      description: Die Auswahl „Aktivität“ deines Hubs.
+      selector:
+        entity:
+          filter:
+            - domain: select
+              integration: realmote
+    zone:
+      name: Zone
+      description: Meist „Zuhause“ (zone.home). Ihr Zustand ist die Zahl der Personen darin.
+      default: zone.home
+      selector:
+        entity:
+          filter:
+            - domain: zone
+    dauer:
+      name: Wie lange niemand da sein muss
+      default:
+        minutes: 10
+      selector:
+        duration: {}
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: numeric_state
+    entity_id: !input zone
+    below: 1
+    for: !input dauer
+
+conditions:
+  # eine Aktivitaet laeuft -- nicht "Aus" und nicht gerade unbekannt (waehrend die Integration neu laedt)
+  - condition: not
+    conditions:
+      - condition: state
+        entity_id: !input aktivitaet_entity
+        state:
+          - Aus
+          - unavailable
+          - unknown
+
+actions:
+  - action: select.select_option
+    target:
+      entity_id: !input aktivitaet_entity
+    data:
+      option: Aus

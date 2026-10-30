@@ -1,0 +1,53 @@
+blueprint:
+  name: "RealMote: Akku der Fernbedienung niedrig"
+  description: >-
+    Meldet sich, wenn der Akku der RealMote-Fernbedienung unter die Schwelle fällt – einmal je Unterschreiten,
+    nicht nach jedem Neustart von Home Assistant erneut. Der Hub übernimmt den Ladestand einmal am Tag.
+    Braucht die RealMote-Integration ab 0.14.0 (Hub-Firmware ab 4.81.64).
+  domain: automation
+  author: RealMote
+  source_url: https://github.com/aTTaTT82/realmote-ha/blob/main/blueprints/automation/realmote/akku_niedrig.yaml
+  homeassistant:
+    min_version: "2024.10.0"
+  input:
+    akku:
+      name: Akku der Fernbedienung
+      description: Der Sensor „Akku Fernbedienung“ deines Hubs.
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              integration: realmote
+              device_class: battery
+    schwelle:
+      name: Melden unter
+      default: 20
+      selector:
+        number:
+          min: 5
+          max: 50
+          step: 5
+          unit_of_measurement: "%"
+    aktionen:
+      name: Benachrichtigung
+      description: Was passieren soll, z. B. eine Nachricht an dein Handy.
+      selector:
+        action: {}
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: numeric_state
+    entity_id: !input akku
+    below: !input schwelle
+
+conditions:
+  # Nach einem Neustart kommt der Wert aus "nicht verfuegbar" -- das ist kein neues Unterschreiten
+  - condition: template
+    value_template: >-
+      {{ trigger.platform == 'numeric_state'
+         and trigger.from_state is not none
+         and is_number(trigger.from_state.state) }}
+
+actions: !input aktionen

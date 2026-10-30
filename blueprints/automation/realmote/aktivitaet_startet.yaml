@@ -1,0 +1,45 @@
+blueprint:
+  name: "RealMote: Wenn eine Aktivität startet"
+  description: >-
+    Führt deine Aktionen aus, sobald am RealMote-Hub eine bestimmte Aktivität startet – egal ob über die
+    Fernbedienung, die Webremote, Alexa oder Home Assistant. Beispiel: „Filmabend“ startet → Licht dimmen,
+    Rollos runter. Für „alles aus“ trägst du „Aus“ als Aktivität ein.
+    Braucht die RealMote-Integration ab 0.14.0 und Hub-Firmware ab 4.81.64.
+  domain: automation
+  author: RealMote
+  source_url: https://github.com/aTTaTT82/realmote-ha/blob/main/blueprints/automation/realmote/aktivitaet_startet.yaml
+  homeassistant:
+    min_version: "2024.10.0"
+  input:
+    aktivitaet_entity:
+      name: RealMote-Hub
+      description: Die Auswahl „Aktivität“ deines Hubs.
+      selector:
+        entity:
+          filter:
+            - domain: select
+              integration: realmote
+    aktivitaet:
+      name: Aktivität
+      description: Der Name genau wie in der Auswahl „Aktivität“, z. B. „Filmabend“. „Aus“ = alles aus.
+      selector:
+        text: {}
+    aktionen:
+      name: Aktionen
+      description: Was dann passieren soll, z. B. eine Szene aktivieren oder Licht dimmen.
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+triggers:
+  # not_from: nach jedem Neuladen der Integration kommt die Aktivitaet aus "nicht verfuegbar" zurueck -- kein Start
+  - trigger: state
+    entity_id: !input aktivitaet_entity
+    not_from:
+      - unavailable
+      - unknown
+    to: !input aktivitaet
+
+actions: !input aktionen

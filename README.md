@@ -66,6 +66,49 @@ welche Activity läuft — der Name gehört ja zu genau einem Gerät. Neue, umbe
 gelöschte eigene Tasten übernimmt Home Assistant von selbst (der Hub meldet sie über
 `realmote/<id>/tasten`); Knöpfe zu gelöschten Tasten verschwinden wieder.
 
+## 🎚️ Laufende Aktivität sehen und wählen (v0.14.0)
+Am RealMote-Gerät gibt es die Auswahl **„Aktivität“** (Aus und deine drei Aktivitäten). Sie zeigt, was
+gerade läuft — egal ob an der Fernbedienung, in der Webremote, per Alexa oder in Home Assistant gewechselt —
+und schaltet um, wenn du eine andere wählst. Damit reagieren Automationen auf den Wechsel, z. B. „Filmabend
+startet → Licht dimmen“ (siehe **Rezepte** unten). Braucht Hub-Firmware ≥ 4.81.64.
+
+## 🔋 Akku der Fernbedienung (v0.14.0)
+Der Sensor **„Akku Fernbedienung“** (unter *Diagnose*) zeigt den Ladestand in Prozent. Der Hub übernimmt ihn
+einmal am Tag aus den Funkpaketen; nach einem Neustart des Hubs kommt der Wert mit dem ersten Tastendruck.
+Hängen mehrere Fernbedienungen an einem Hub, zeigt er die, die zuletzt gemeldet hat. Hub-Firmware ≥ 4.81.64.
+
+## 🔌 Echter Zustand der Geräte (v0.14.0)
+Der Hub merkt sich nur, was er selbst geschaltet hat. Geht der Fernseher von selbst aus (eigener Schlaf-Timer)
+oder nimmt jemand die Original-Fernbedienung, schaltet der nächste Wechsel verkehrt herum — das klassische
+Problem aller Universalfernbedienungen. Kennt Home Assistant den echten Zustand, übernimmt der Hub ihn:
+
+1. Beim Gerät auf **Konfigurieren** → **„Zustand der Geräte aus Home Assistant“** → Gerät des Hubs wählen
+   (Fernseher, Soundbar, Sat/Kabel, Android TV, weitere Geräte).
+2. Die Entität wählen, die den Zustand kennt: am zuverlässigsten eine **Steckdose mit Strommessung**
+   (Leistungs-Sensor in W, „an“ ab der Schwelle, Vorgabe 15 W) oder der Mediaplayer des Geräts selbst.
+   Ein Mediaplayer, der „nicht verfügbar“ zeigt, wenn das Gerät aus ist, hilft nicht.
+3. Optional **Nachfassen**: 10 s nach dem Ein- oder Ausschalten fragt der Hub nach; stimmt der Zustand nicht,
+   schickt er den Befehl einmal noch. Nur einschalten, wenn die Entität schnell und zuverlässig meldet.
+
+Was der Hub daraus macht: weicht der gemeldete Zustand ab, gilt er (gesendet wird dabei nichts) — der nächste
+Wechsel schaltet richtig herum, und ein **erneuter Druck auf die laufende Aktivität schaltet Geräte ein**, die
+laut Home Assistant aus sind. Bis 30 s nach dem eigenen Schalten zählt eine widersprechende Meldung noch
+nicht (Home Assistant sieht ein Gerät oft erst Sekunden später an) — die letzte aus dieser Zeit gilt, sobald
+sie vorbei ist. Ohne Zuordnung ändert sich nichts. Hub-Firmware ≥ 4.81.64.
+
+## 📋 Fertige Rezepte (Blueprints, v0.14.0)
+Mit einem Klick importieren (öffnet dein Home Assistant), dann unter *Automatisierungen → Blueprints* eine
+Automation daraus anlegen:
+
+| Rezept | Was es tut | Importieren |
+|---|---|---|
+| Wenn eine Aktivität startet | Deine Aktionen, sobald eine bestimmte Aktivität startet (z. B. Licht dimmen, Rollos runter; „Aus“ = alles aus) | [Import](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FaTTaTT82%2Frealmote-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Frealmote%2Faktivitaet_startet.yaml) |
+| Pause bei Anruf | Klingelt das Handy, pausiert der Hub die Wiedergabe; auf Wunsch weiter nach dem Gespräch (Telefonstatus der HA-App, nur Android) | [Import](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FaTTaTT82%2Frealmote-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Frealmote%2Fpause_bei_anruf.yaml) |
+| Alles aus, wenn niemand zu Hause ist | Ist eine Weile niemand mehr in der Zone „Zuhause“, schaltet der Hub alles aus | [Import](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FaTTaTT82%2Frealmote-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Frealmote%2Fniemand_zuhause_alles_aus.yaml) |
+| Akku der Fernbedienung niedrig | Meldet sich einmal, wenn der Akku unter die Schwelle fällt (nicht nach jedem HA-Neustart erneut) | [Import](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FaTTaTT82%2Frealmote-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Frealmote%2Fakku_niedrig.yaml) |
+
+Die Dateien liegen unter [`blueprints/automation/realmote/`](blueprints/automation/realmote/).
+
 ## 🎛️ Jede Taste als HA-Ereignis (Automationen auf ALLE Tasten)
 Ab v0.7.0 (+ Hub-Firmware ≥ 4.12.0) taucht **jede Taste der Fernbedienung** als
 **Ereignis-Entity** am RealMote-Gerät auf (z. B. „Taste Rot", „Taste Play",
@@ -164,6 +207,10 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.14.0** – 🎚️ **Auswahl „Aktivität“** (zeigt und wechselt die laufende Aktivität), 🔋 **Sensor „Akku
+  Fernbedienung“**, 🔌 **echter Zustand der Geräte aus Home Assistant** (Optionen: Gerät des Hubs →
+  Entität, Nachfassen, Schwelle für Leistungs-Sensoren) und 📋 **vier Rezepte** (Blueprints): Aktivität
+  startet, Pause bei Anruf, alles aus wenn niemand zu Hause, Akku niedrig. Braucht Hub-Firmware ≥ 4.81.64.
 - **0.13.0** – ⭐ **Eigene Tasten je Gerät** als Knöpfe („Fernseher: Netflix senden"),
   direkt an dieses Gerät (`key:CUSTOM_k@<gerät>`), Liste und Namen live vom Hub
   (`realmote/<id>/tasten`, retained); Knöpfe zu gelöschten Tasten werden entfernt.

@@ -38,6 +38,7 @@
           "hold_4": "⏱️ Button 4 · hold",
           "hold_5": "⏱️ Button 5 · hold",
           "hold_6": "⏱️ Button 6 · hold",
+          "zustand": "🔌 Device state from Home Assistant",
           "finish": "✅ Done & save"
         }
       },
@@ -49,6 +50,26 @@
           "action": "Action",
           "brightness": "Brightness % (lights only, with \"On\")",
           "position": "Position % (covers only, with \"Set position\")"
+        }
+      },
+      "zustand": {
+        "title": "🔌 State from Home Assistant",
+        "description": "The hub only remembers what it switched itself. If a device turns off by itself or someone uses the original remote, the next change switches it the wrong way. If Home Assistant knows the real state (media player, smart plug with power metering, sensor), the hub takes it over.\n\nWhich device of the hub?",
+        "data": {
+          "geraet": "Device of the hub"
+        }
+      },
+      "zustand_assign": {
+        "title": "State for {geraet}",
+        "description": "**{geraet}** — which entity knows the real state? Leave the field empty to delete the assignment.\n\n💡 Most reliable is a **smart plug with power metering** (power in W) or the device's own media player. A media player that shows “unavailable” when the device is off does not help.",
+        "data": {
+          "entity": "Entity with the state",
+          "nachfassen": "Follow up",
+          "schwelle": "Threshold (power sensor only)"
+        },
+        "data_description": {
+          "nachfassen": "10 seconds after switching on or off, the hub asks again. If the state does not match, it sends the command once more. Only enable this if the entity reports quickly and reliably – otherwise the hub switches off a device that is still starting.",
+          "schwelle": "From this power on the device counts as on (TV in standby: below 1 W)."
         }
       }
     }
