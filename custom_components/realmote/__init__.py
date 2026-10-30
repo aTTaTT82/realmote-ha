@@ -16,6 +16,7 @@ from .const import (
     CONF_BASE_TOPIC,
     CONF_BRIGHTNESS,
     CONF_DEVICE_ID,
+    CONF_EIGEN,
     CONF_ENTITY,
     CONF_FW,
     CONF_IP,
@@ -52,6 +53,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         sw_version=fw,
         configuration_url=f"http://{ip}/" if ip else None,
     )
+
+    # Neu laden, wenn sich Daten/Optionen aendern -- VOR dem ersten Abo (v0.13.0): die retained Nachrichten
+    # (Activity-Namen, eigene Tasten) koennen noch waehrend der Einrichtung eintreffen. Stand der Listener erst
+    # danach, wurden sie zwar gespeichert, aber nichts neu geladen -- die Knoepfe stimmten erst nach dem
+    # naechsten HA-Neustart. Ein Neuladen mitten in der Einrichtung wartet auf deren Ende (setup_lock).
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     # Taster-Events -> Aktion ausfuehren. Kurz = .../button, Lang halten = .../hold.
     button_topic = f"{base}/{device_id}/button"
@@ -108,8 +115,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(await mqtt.async_subscribe(hass, announce_topic, _on_announce))
 
+    # Eigene Tasten je Geraet (Firmware >= 4.81.60, retained): [{"g":"tv","n":"Fernseher","e":[[1,"Netflix"],...]},...]
+    # -> Knoepfe "Fernseher: Netflix senden". Wie bei den Activity-Namen nur bei Aenderung speichern; der
+    # Update-Listener laedt den Eintrag dann neu. Eine leere Liste ist gueltig (alle eigenen Tasten geloescht).
+    @callback
+    def _on_tasten(msg: mqtt.ReceiveMessage) -> None:
+        try:
+            eigen = json.loads(msg.payload)
+        except (ValueError, TypeError):
+            return
+        if isinstance(eigen, list) and eigen != entry.data.get(CONF_EIGEN, []):
+            hass.config_entries.async_update_entry(
+                entry, data={**entry.data, CONF_EIGEN: eigen}
+            )
+
+    entry.async_on_unload(
+        await mqtt.async_subscribe(hass, f"{base}/{device_id}/tasten", _on_tasten)
+    )
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     _LOGGER.info("RealMote %s: hoere auf %s", device_id, button_topic)
     return True

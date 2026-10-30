@@ -9,6 +9,7 @@ CONF_IP = "ip"
 CONF_FW = "fw"
 CONF_ACTS = "acts"          # Activity-Namen aus dem Hub-Announce (Firmware >= 4.11.0)
 CONF_BUILD = "build"        # Build-Nummer aus dem Announce (Firmware >= 4.19.1)
+CONF_EIGEN = "eigen"        # eigene Tasten je Geraet aus realmote/<id>/tasten (Firmware >= 4.81.60)
 
 # Signal, wenn ein neuer Announce eintrifft (Update-Entity haengt sich dran)
 SIGNAL_ANNOUNCE = f"{DOMAIN}_announce"

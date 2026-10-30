@@ -50,6 +50,22 @@ einfach in HA bei Bedarf aktivieren.
 Für Sprachsteuerung: den gewünschten Knopf (z. B. „Pause senden") wie gewohnt an
 Alexa/Google durchreichen und eine Routine mit eigenem Sprachbefehl darauf legen.
 
+Ab v0.13.0 gibt es dazu **„Ziffer 0 senden" … „Ziffer 9 senden"** (Hub ≥ 4.81.59) und
+**„Quelle senden"** (Hub ≥ 4.81.49) — ebenfalls Activity-bewusst und von Haus aus
+deaktiviert. Ein Sender per Nummer ist damit ein Skript aus zwei Knöpfen, z. B.
+„Ziffer 1 senden" + „Ziffer 2 senden" für Programm 12.
+
+## ⭐ Eigene Tasten je Gerät (z. B. „Fernseher: Netflix senden")
+Ab v0.13.0 (+ Hub-Firmware ≥ 4.81.61): Jede **eigene Taste**, die du in der
+Konfiguration des Hubs angelernt hast (bis zu 10 je Gerät, mit selbst gewähltem Namen),
+erscheint am RealMote-Gerät als Knopf — benannt nach Gerät und Taste, z. B.
+**„Fernseher: Netflix senden"** oder **„Beamer: Bildmodus senden"**.
+
+Anders als die übrigen Tasten-Knöpfe geht ein Druck **direkt an dieses Gerät**, egal
+welche Activity läuft — der Name gehört ja zu genau einem Gerät. Neue, umbenannte oder
+gelöschte eigene Tasten übernimmt Home Assistant von selbst (der Hub meldet sie über
+`realmote/<id>/tasten`); Knöpfe zu gelöschten Tasten verschwinden wieder.
+
 ## 🎛️ Jede Taste als HA-Ereignis (Automationen auf ALLE Tasten)
 Ab v0.7.0 (+ Hub-Firmware ≥ 4.12.0) taucht **jede Taste der Fernbedienung** als
 **Ereignis-Entity** am RealMote-Gerät auf (z. B. „Taste Rot", „Taste Play",
@@ -148,6 +164,13 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.13.0** – ⭐ **Eigene Tasten je Gerät** als Knöpfe („Fernseher: Netflix senden"),
+  direkt an dieses Gerät (`key:CUSTOM_k@<gerät>`), Liste und Namen live vom Hub
+  (`realmote/<id>/tasten`, retained); Knöpfe zu gelöschten Tasten werden entfernt.
+  Dazu **„Ziffer 0–9 senden"** und **„Quelle senden"** (Activity-bewusst, deaktiviert).
+  Braucht Hub-Firmware ≥ 4.81.61 für die eigenen Tasten, ≥ 4.81.59 für die Ziffern.
+  Robust gegen kaputte Nachrichten auf `tasten` (die übrigen Knöpfe bleiben), und eine
+  Änderung, die schon beim Start von HA eintrifft, gilt sofort (Listener vor dem ersten Abo).
 - **0.12.0** – 🎨 **Das echte RealMote-Logo** statt der gezeichneten Sechs-Tasten-Grafik.
   `brand/` und `images/` sind neu erzeugt; `logo.png` (heller Grund) trägt die Wortmarke
   in Graphit, `dark_logo.png` in Silber — das Blau bleibt in beiden, es trägt auf jedem
