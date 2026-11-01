@@ -4,8 +4,8 @@
 
 <h1 align="center">RealMote – Home Assistant Integration</h1>
 
-Macht aus dem **RealMote Hub** (6-Tasten-Funk-Fernbedienung + ESP32-Hub) ein echtes
-Home-Assistant-Gerät: Du legst jede Taste direkt im Geräte-Menü auf ein beliebiges HA-Gerät
+Macht aus dem **RealMote Hub** (Funk-Fernbedienung mit den sechs Smart-Home-Tasten I–VI + ESP32-Hub) ein echtes
+Home-Assistant-Gerät: Du legst jede Smart-Home-Taste direkt im Geräte-Menü auf ein beliebiges HA-Gerät
 und eine Aktion – **inklusive Helligkeit für Lampen und Position für Rollos**. Keine
 Automationen, keine Topics, kein YAML.
 
@@ -75,7 +75,8 @@ startet → Licht dimmen“ (siehe **Rezepte** unten). Braucht Hub-Firmware ≥ 
 ## 🔋 Akku der Fernbedienung (v0.14.0)
 Der Sensor **„Akku Fernbedienung“** (unter *Diagnose*) zeigt den Ladestand in Prozent. Der Hub übernimmt ihn
 einmal am Tag aus den Funkpaketen; nach einem Neustart des Hubs kommt der Wert mit dem ersten Tastendruck.
-Hängen mehrere Fernbedienungen an einem Hub, zeigt er die, die zuletzt gemeldet hat. Hub-Firmware ≥ 4.81.64.
+Hängen mehrere Fernbedienungen an einem Hub, zeigt er den Wert, den der Hub zuletzt übernommen hat — von der
+Fernbedienung, die nach dem Neustart bzw. nach Ablauf des Tages als erste gefunkt hat. Hub-Firmware ≥ 4.81.64.
 
 ## 🔌 Echter Zustand der Geräte (v0.14.0)
 Der Hub merkt sich nur, was er selbst geschaltet hat. Geht der Fernseher von selbst aus (eigener Schlaf-Timer)
@@ -154,7 +155,8 @@ Der Hub erscheint jetzt unter **Einstellungen → Geräte & Dienste → Updates*
 andere Gerät: Version, Änderungsprotokoll, ein Knopf **Installieren**.
 
 **Warum das nicht einfach der Hub selbst macht:** Beim Aufbau einer gesicherten Verbindung
-bleiben dem ESP32 nur rund **23 KB** freier Arbeitsspeicher. Das reicht heute — aber jede
+blieben dem ESP32 damals (v0.9.0) nur rund **23 KB** freier Arbeitsspeicher; seit der Hub den
+Speicher dafür aus dem PSRAM nimmt, ist es mehr. Aber jede
 neue Funktion knabbert daran, und wenn es einmal nicht mehr reicht, könnte der Hub genau die
 Reparatur nicht mehr laden, die das beheben würde. Deshalb übernimmt Home Assistant den
 Internet-Teil: HA lädt Manifest und Firmware und **schiebt** die Datei über das lokale Netz
@@ -171,8 +173,8 @@ Ein manipuliertes Manifest beantwortet der Hub mit einer Ablehnung. Braucht Hub-
 einer Version nicht erkennen, dass ein Update bereitliegt).
 
 ## 🔋 Firmware der Fernbedienung aus Home Assistant (v0.10.0)
-Neben der Hub-Firmware steht jetzt eine zweite Update-Entität: **„Firmware der
-Fernbedienung"**. Sie zeigt, welche Version dort wirklich läuft, und welche veröffentlicht
+Neben der Hub-Firmware steht jetzt eine zweite Update-Entität: **„Aktualisierung
+Fernbedienung"** (bis v0.10.0 „Firmware der Fernbedienung"). Sie zeigt, welche Version dort wirklich läuft, und welche veröffentlicht
 ist — und kann sie ausliefern.
 
 **Warum das vorher nicht ging:** Die Fernbedienung hängt nicht am Netz. Erreichbar ist sie
@@ -201,8 +203,10 @@ Weboberfläche des Hubs (Broker, WLAN, Firmware-Update). Die Firmware-Version wi
 angezeigt und bei jedem Announce aktuell gehalten.
 
 ## Status
-v0.3. Transport = MQTT. Firmware-Announce: `realmote/<id>/announce` (enthält `ip`, `fw`),
-Taster-Event: `realmote/<id>/button` = Tastennummer. Braucht Hub-Firmware **≥ 4.6.1**
+Die Version steht in `custom_components/realmote/manifest.json` und unter **Änderungen**.
+Transport = MQTT. Firmware-Announce: `realmote/<id>/announce` (enthält `ip`, `fw`, `build`, `acts`),
+Taster-Event: `realmote/<id>/button` = Tastennummer (lang gehalten: `/hold`), jede andere Taste: `/key`,
+Befehle an den Hub: `realmote/<id>/cmd`. `realmote` ist das Basis-Topic des Hubs. Braucht Hub-Firmware **≥ 4.6.1**
 für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Ordner geladen
 (kein `home-assistant/brands`-Eintrag nötig).
 
