@@ -434,8 +434,8 @@ class RealMoteRemoteUpdate(UpdateEntity):
         if not st or not st.get("published"):
             raise HomeAssistantError(
                 "Der Hub kennt keine veroeffentlichte Fernbedienungs-Firmware. "
-                "Er sieht taeglich nach; erzwingen laesst es sich mit einem Aufruf "
-                "von /updatecheck."
+                "Er sieht taeglich nach; sofort geht es in der Weboberflaeche des Hubs "
+                "unter Konfiguration → Update → „Nach Updates suchen“."
             )
 
         url = st.get("url")

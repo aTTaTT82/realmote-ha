@@ -2,8 +2,9 @@
 
 Der Hub meldet den Ladestand retained auf realmote/<id>/akku = 0..100 (Firmware >= 4.81.64). Er uebernimmt ihn
 einmal am Tag aus den Funkpaketen (der Wert wackelt unter Sendelast) -- der Sensor aendert sich also selten.
-Mit mehreren Fernbedienungen an einem Hub zeigt er die, die zuletzt gemeldet hat. Fuer eine Warnung bei
-niedrigem Stand gibt es einen Blueprint im Repo.
+Mit mehreren Fernbedienungen an einem Hub zeigt er den Wert, den der Hub zuletzt uebernommen hat -- von der
+Fernbedienung, die nach dem Neustart des Hubs bzw. nach Ablauf des Tages als erste gefunkt hat. Fuer eine
+Warnung bei niedrigem Stand gibt es einen Blueprint im Repo.
 """
 from __future__ import annotations
 
