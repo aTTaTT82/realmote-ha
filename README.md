@@ -86,7 +86,8 @@ Problem aller Universalfernbedienungen. Kennt Home Assistant den echten Zustand,
 1. Beim Gerät auf **Konfigurieren** → **„Zustand der Geräte aus Home Assistant“** → Gerät des Hubs wählen
    (Fernseher, Soundbar, Sat/Kabel, Android TV, weitere Geräte).
 2. Die Entität wählen, die den Zustand kennt: am zuverlässigsten eine **Steckdose mit Strommessung**
-   (Leistungs-Sensor in W, „an“ ab der Schwelle, Vorgabe 15 W) oder der Mediaplayer des Geräts selbst.
+   (Leistungs-Sensor, „an“ ab der Schwelle in Watt, Vorgabe 15 W; ein Sensor in kW wird seit 0.14.1 umgerechnet)
+   oder der Mediaplayer des Geräts selbst.
    Ein Mediaplayer, der „nicht verfügbar“ zeigt, wenn das Gerät aus ist, hilft nicht.
 3. Optional **Nachfassen**: 10 s nach dem Ein- oder Ausschalten fragt der Hub nach; stimmt der Zustand nicht,
    schickt er den Befehl einmal noch. Nur einschalten, wenn die Entität schnell und zuverlässig meldet.
@@ -211,6 +212,8 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.14.1** – 🔌 Zustand der Geräte: ein Leistungs-Sensor in **kW** (oder MW, mW) wird in Watt umgerechnet, bevor er mit
+  der Schwelle verglichen wird. Bisher galten 0,08 kW als 0,08 W — das Gerät stand fälschlich auf „aus“.
 - **0.14.0** – 🎚️ **Auswahl „Aktivität“** (zeigt und wechselt die laufende Aktivität), 🔋 **Sensor „Akku
   Fernbedienung“**, 🔌 **echter Zustand der Geräte aus Home Assistant** (Optionen: Gerät des Hubs →
   Entität, Nachfassen, Schwelle für Leistungs-Sensoren) und 📋 **vier Rezepte** (Blueprints): Aktivität

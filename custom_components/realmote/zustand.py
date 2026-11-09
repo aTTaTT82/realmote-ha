@@ -41,6 +41,9 @@ _LOGGER = logging.getLogger(__name__)
 GERAETE = ("tv", "soundbar", "receiver", "android", "x0", "x1", "x2", "x3")
 AUS = {"off", "standby"}
 UNBEKANNT = {"unavailable", "unknown", ""}
+# 0.14.1: die Schwelle ist in Watt. Ein Leistungs-Sensor in kW meldete 0,08 statt 80 und galt damit als "aus"
+# (gegen 15 W verglichen). Unbekannte oder fehlende Einheit: wie bisher, der Zahlenwert gilt als Watt.
+EINHEIT_IN_WATT = {"W": 1.0, "kW": 1000.0, "MW": 1_000_000.0, "mW": 0.001}
 
 
 def an_aus(state: State | None, schwelle: float) -> bool | None:
@@ -50,9 +53,12 @@ def an_aus(state: State | None, schwelle: float) -> bool | None:
     domain = state.entity_id.split(".")[0]
     if domain == "sensor":
         try:
-            return float(state.state) > float(schwelle)
+            wert = float(state.state)
+            grenze = float(schwelle)
         except (TypeError, ValueError):
             return None
+        faktor = EINHEIT_IN_WATT.get(state.attributes.get("unit_of_measurement") or "W", 1.0)
+        return wert * faktor > grenze
     if domain == "media_player":
         return state.state not in AUS
     if state.state == "on":
