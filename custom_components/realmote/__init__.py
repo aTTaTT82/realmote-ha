@@ -27,6 +27,8 @@ from .const import (
     CONF_POSITION,
     DEFAULT_BASE_TOPIC,
     DOMAIN,
+    LANG_HUB_DATA,
+    NUM_BUTTONS,
     PLATFORMS,
     SIGNAL_ANNOUNCE,
 )
@@ -85,6 +87,38 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(await mqtt.async_subscribe(hass, button_topic, _on_button))
     entry.async_on_unload(await mqtt.async_subscribe(hass, hold_topic, _on_hold))
+
+    # 0.14.3: "lang halten" ist an ZWEI Stellen belegbar -- hier und als Lang-Topic im Hub. Beide melden einander, wo
+    # lang belegt ist (retained "[1,6]"): der Hub .../lang_hub (ab 4.81.79), wir .../lang_ha. Regel fuer beide: ist eine
+    # Taste irgendwo lang belegt, kommt bei langem Druck nur lang; sonst wirkt lang wie kurz -- nie beides
+    # (Anwender 10.11.2026: "Wenn lang ausgeloest wird, darf kurz nicht auch noch kommen! Andersrum genauso.").
+    lang_hub_daten: dict = hass.data.setdefault(LANG_HUB_DATA, {})
+
+    def _vergiss_lang_hub() -> None:
+        # 🔴 KEIN lambda mit pop(): HA haelt einen Rueckgabewert von on_unload fuer eine Aufgabe und bricht das Entladen
+        # ab (im Test-HA 10.11.2026: "Error unloading entry" -> kein Neuladen nach dem Belegen, Abos blieben stehen)
+        lang_hub_daten.pop(entry.entry_id, None)
+
+    entry.async_on_unload(_vergiss_lang_hub)
+
+    @callback
+    def _on_lang_hub(msg: mqtt.ReceiveMessage) -> None:
+        try:
+            liste = json.loads(msg.payload)
+        except (ValueError, TypeError):
+            return
+        if isinstance(liste, list):
+            lang_hub_daten[entry.entry_id] = {n for n in liste if isinstance(n, int) and not isinstance(n, bool)}
+
+    entry.async_on_unload(
+        await mqtt.async_subscribe(hass, f"{base}/{device_id}/lang_hub", _on_lang_hub)
+    )
+    try:
+        belegt = sorted(n for n in range(1, NUM_BUTTONS + 1)
+                        if (entry.options.get(f"{n}h") or {}).get(CONF_ENTITY))
+        await mqtt.async_publish(hass, f"{base}/{device_id}/lang_ha", json.dumps(belegt), qos=0, retain=True)
+    except Exception:  # noqa: BLE001 -- ein Fehler hier darf die Einrichtung samt Tasten nicht scheitern lassen
+        _LOGGER.exception("RealMote: Lang-Belegungen lassen sich dem Hub nicht melden")
 
     # Announce -> IP/Firmware live halten (DHCP-Wechsel, Firmware-Update)
     announce_topic = f"{base}/{device_id}/announce"
@@ -178,8 +212,14 @@ async def _run_button(
     key = f"{button}h" if hold else str(button)  # kurz: "1".."6", lang: "1h".."6h"
     cfg = entry.options.get(key)
     if hold and (not cfg or not cfg.get(CONF_ENTITY)):
-        # 0.14.2 (Anwender 10.11.2026): ist "lang halten" frei, wirkt langes Halten wie kurz tippen -- wie der Hub mit
-        # seinen eigenen Topics ab 4.81.78. Bis 0.14.1 tat ein langer Druck auf so eine Taste nichts.
+        # 0.14.2 (Anwender 10.11.2026): ist "lang halten" frei, wirkt langes Halten wie kurz tippen. 0.14.3: aber nur,
+        # wenn der Hub gemeldet hat, dass er fuer diese Taste selbst kein Lang-Topic hat (.../lang_hub, ab 4.81.79) --
+        # sonst kaeme sein Lang-Topic UND unser Kurz-Befehl. Meldet er nichts (aelterer Hub), bleibt es wie bis 0.14.1.
+        lang_hub = hass.data.get(LANG_HUB_DATA, {}).get(entry.entry_id)
+        if lang_hub is None or button in lang_hub:
+            _LOGGER.debug("RealMote: Taste %s lang ist hier frei, %s", button,
+                          "der Hub meldet seine Belegung nicht" if lang_hub is None else "der Hub hat dafuer ein Lang-Topic")
+            return
         cfg = entry.options.get(str(button))
     if not cfg or not cfg.get(CONF_ENTITY):
         _LOGGER.debug("RealMote: Taste %s (%s) ist nicht belegt", button, "lang" if hold else "kurz")
@@ -252,3 +292,12 @@ async def _run_button(
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Abmelden (unsubscribe passiert ueber entry.async_on_unload)."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """0.14.3: Eintrag geloescht -- die retained Lang-Belegungen beim Broker loeschen, sonst haelt der Hub sie fuer gueltig."""
+    base = entry.data.get(CONF_BASE_TOPIC, DEFAULT_BASE_TOPIC)
+    try:
+        await mqtt.async_publish(hass, f"{base}/{entry.data[CONF_DEVICE_ID]}/lang_ha", "", qos=0, retain=True)
+    except Exception:  # noqa: BLE001
+        _LOGGER.debug("RealMote: Lang-Belegungen beim Broker nicht geloescht", exc_info=True)

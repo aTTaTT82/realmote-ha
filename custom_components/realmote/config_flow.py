@@ -17,6 +17,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    LANG_HUB_DATA,
     ACTIONS,
     CONF_ACTION,
     CONF_BASE_TOPIC,
@@ -184,10 +185,15 @@ class RealMoteOptionsFlow(OptionsFlow):
             elif cfg.get(CONF_POSITION) is not None:
                 extra = f" {int(cfg[CONF_POSITION])} %"
             return f"{emoji} **{num}** {friendly} → _{act}{extra}_"
-        # 0.14.2: ein freies "lang halten" wirkt wie kurz tippen (_run_button) -- das soll die Uebersicht auch sagen
-        kurz = self._options.get(str(num))
-        if key.endswith("h") and kurz and kurz.get(CONF_ENTITY):
-            return f"↩️ **{num}** _wie kurz tippen_"
+        # 0.14.2/0.14.3: ein freies "lang halten" wirkt wie kurz tippen (_run_button) -- aber nur, wenn der Hub gemeldet
+        # hat, dass er dafuer selbst kein Lang-Topic hat. Die Uebersicht sagt, was wirklich passiert.
+        if key.endswith("h"):
+            lang_hub = self.hass.data.get(LANG_HUB_DATA, {}).get(self._entry.entry_id)
+            if lang_hub is not None and num in lang_hub:
+                return f"🏠 **{num}** _im Hub belegt_"
+            kurz = self._options.get(str(num))
+            if lang_hub is not None and kurz and kurz.get(CONF_ENTITY):
+                return f"↩️ **{num}** _wie kurz tippen_"
         return f"⚪ **{num}** _frei_"
 
     def _overview(self) -> str:
