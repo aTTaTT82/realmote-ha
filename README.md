@@ -12,7 +12,7 @@ Automationen, keine Topics, kein YAML.
 Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheidet diese Integration.
 
 ## Voraussetzungen
-- Home Assistant mit eingerichteter **MQTT-Integration** (z. B. Mosquitto-Broker-App).
+- Home Assistant **ab 2024.7** mit eingerichteter **MQTT-Integration** (z. B. Mosquitto-Broker-App).
 - Ein RealMote Hub mit Firmware **≥ 4.6.0**, verbunden mit demselben MQTT-Broker
   (im Hub unter `http://<hub-ip>/mqtt` konfiguriert).
 
@@ -25,19 +25,22 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
 1. Wenn der Hub online ist, taucht er **automatisch** unter *Einstellungen → Geräte & Dienste*
    auf („Entdeckt"). Auf **Konfigurieren** → bestätigen.
    (Falls nicht: *Integration hinzufügen → RealMote* und die Geräte-ID von der `/health`-Seite eintragen.)
-2. Beim Gerät auf **Konfigurieren** → Taste wählen → **Gerät** aus der Liste, **Aktion**
-   (Umschalten/An/Aus/Öffnen/Schließen/Position), optional **Helligkeit %** oder **Position %**.
-3. Fertig. Tastendruck auf der Fernbedienung führt die Aktion aus. Bleibt **lang halten** frei, macht langes Halten
+2. Beim Gerät auf **Konfigurieren** → **Taste I–VI** wählen (die Startseite zeigt unter jeder Taste, was kurz und
+   lang darauf liegt) → für **Kurz tippen** und **Lang halten** je ein Gerät, eine Szene oder ein Skript → **Weiter**.
+   Danach fragt der Dialog nur die Aktionen, die zum Typ passen: Lampe Umschalten/An/Aus mit **Helligkeit %**,
+   Rollo Umschalten/Öffnen/Schließen/Position mit **Position %**; Szene, Skript und Knopf brauchen keine Wahl.
+3. Zum Schluss **✅ Speichern** — erst dann gelten die Änderungen. Tastendruck auf der Fernbedienung führt die Aktion aus. Bleibt **lang halten** frei, macht langes Halten
    dasselbe wie kurz tippen — es sei denn, im Hub steht für diese Taste ein eigenes Lang-Thema. Hub und Integration
    melden einander, wo lang belegt ist; bei langem Druck kommt nie lang **und** kurz (ab 0.14.3 mit Hub ab 4.81.79).
 
 ## Aktionen
 | Aktion | Wirkt auf | Extra-Feld |
 |---|---|---|
-| Umschalten | Licht, Schalter, … | – |
-| An / Aus | Licht, Schalter, … | Helligkeit % (Licht) |
+| Umschalten | Licht, Schalter, Rollo, … | – |
+| An / Aus | Licht, Schalter, … | Helligkeit % (Licht, nur bei „An“) |
 | Öffnen / Schließen | Rollo/Cover | – |
-| Position setzen | Rollo/Cover | Position % |
+| Auf Position fahren | Rollo/Cover | Position % |
+| – (keine Wahl) | Szene, Skript, Knopf | – |
 
 ## 🗣️ Tasten aus HA ausführen (z. B. „Alexa, Pause")
 Ab v0.8.0 (+ Hub-Firmware ≥ 4.13.0) gibt es am Gerät **drückbare Knöpfe für die
@@ -141,16 +144,16 @@ Die Knöpfe funktionieren natürlich auch im Dashboard, in Automationen und per
 Sprachassistent.
 
 ## 🎬 Ganze Szenen auf eine Taste legen
-Im Feld **„Gerät / Szene / Skript"** kannst du auch eine **Szene** oder ein **Skript**
+In den Feldern **„Kurz tippen"** und **„Lang halten"** kannst du auch eine **Szene** oder ein **Skript**
 auswählen — so legst du eine ganze Stimmung (mehrere Lampen, Rollos, Mediaplayer, …)
 auf eine einzige Taste:
 
 1. Szene in HA zusammenstellen: **Einstellungen → Automatisierungen & Szenen → Szenen → Szene hinzufügen**
    (Geräte reinziehen, gewünschte Zustände einstellen, speichern).
-2. In RealMote den Tasten-Slot öffnen und die Szene als Ziel wählen.
+2. In RealMote die Taste öffnen und die Szene als Ziel wählen.
 
-Die „Aktion" ist dabei egal — Szenen werden **immer aktiviert**, Skripte **immer gestartet**,
-Button-Entities **immer gedrückt** (die Integration erkennt den Typ selbst, es kann nichts
+Eine Aktion gibt es dabei nicht zu wählen — Szenen werden **immer aktiviert**, Skripte **immer gestartet**,
+Button-Entities **immer gedrückt** (die Integration erkennt den Typ selbst und fragt gar nicht erst, es kann nichts
 falsch eingestellt werden). Tipp: kurz tippen = Szene „Film", lang halten = Szene „Alles hell".
 
 ## ⬆️ Firmware-Update aus Home Assistant (v0.9.0)
@@ -214,6 +217,7 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.15.0** – 🎛️ **Neuer Einstellungsdialog:** Die Startseite zeigt die sechs Tasten **I–VI** wie auf der Fernbedienung, unter jeder eine Zeile, was kurz und lang darauf liegt (auch „im Hub belegt“ und „wie kurz“) — statt Textblock und 14 Einträgen. Je Taste ein Formular für kurz **und** lang, danach nur die Aktionen, die zum Typ passen: Helligkeit nur bei Lampen, Position nur bei Rollos, bei Szene, Skript und Knopf gar keine Frage. „Auf Position fahren“ ohne Wert wird nicht mehr still als 0 % gespeichert, der Dialog fragt nach. Die gespeicherten Belegungen behalten ihr Format und gelten weiter. Braucht Home Assistant ab 2024.7.
 - **0.14.4** – 🏠 **Was schon im Hub belegt ist, steht jetzt in der Übersicht:** „im Hub belegt“, und wo eine Taste hier **und** im Hub belegt ist, die Warnung „auch im Hub belegt – beides läuft“; beim Belegen nennt das Formular denselben Hinweis. Der Hub meldet dafür ab 4.81.80 auch seine Kurz-Themen (`realmote/<id>/kurz_hub`, retained).
 - **0.14.3** – ⏱️ **Nie lang und kurz zugleich:** Hub und Integration melden einander, wo „lang halten“ belegt ist
   (`realmote/<id>/lang_ha` und `…/lang_hub`, retained). Ist eine Taste irgendwo lang belegt, kommt bei langem Druck nur

@@ -23,33 +23,70 @@
   "options": {
     "step": {
       "init": {
-        "title": "🎛️ Button assignment",
-        "description": "{overview}\n\nPick an entry to change – or save with \"✅ Done\".",
+        "title": "Smart home keys",
+        "description": "Tap a key to assign it.",
         "menu_options": {
-          "button_1": "🔘 Button 1 · tap",
-          "button_2": "🔘 Button 2 · tap",
-          "button_3": "🔘 Button 3 · tap",
-          "button_4": "🔘 Button 4 · tap",
-          "button_5": "🔘 Button 5 · tap",
-          "button_6": "🔘 Button 6 · tap",
-          "hold_1": "⏱️ Button 1 · hold",
-          "hold_2": "⏱️ Button 2 · hold",
-          "hold_3": "⏱️ Button 3 · hold",
-          "hold_4": "⏱️ Button 4 · hold",
-          "hold_5": "⏱️ Button 5 · hold",
-          "hold_6": "⏱️ Button 6 · hold",
-          "zustand": "🔌 Device state from Home Assistant",
-          "finish": "✅ Done & save"
+          "taste_1": "Key I",
+          "taste_2": "Key II",
+          "taste_3": "Key III",
+          "taste_4": "Key IV",
+          "taste_5": "Key V",
+          "taste_6": "Key VI",
+          "zustand": "Device state from Home Assistant",
+          "finish": "✅ Save"
+        },
+        "menu_option_descriptions": {
+          "taste_1": "{t1}",
+          "taste_2": "{t2}",
+          "taste_3": "{t3}",
+          "taste_4": "{t4}",
+          "taste_5": "{t5}",
+          "taste_6": "{t6}",
+          "zustand": "{zustand}",
+          "finish": "Changes apply only after this"
         }
       },
-      "assign": {
-        "title": "Set action",
-        "description": "**{label}** — pick a target & action. Leave “Target” empty to clear the slot.{hinweis}\n\n💡 **Tip:** You can also pick **scenes** and **scripts** — putting a whole mood (multiple lights, covers, …) on one button. Build scenes under *Settings → Automations & Scenes → Scenes*; the chosen “action” is ignored, a scene is always activated.",
+      "taste": {
+        "title": "Key {nr}",
+        "description": "Device, scene or script – what should the key do?{hinweis}",
         "data": {
-          "entity": "Target / scene / script",
-          "action": "Action",
-          "brightness": "Brightness % (lights only, with \"On\")",
-          "position": "Position % (covers only, with \"Set position\")"
+          "kurz": "Tap",
+          "lang": "Hold"
+        },
+        "data_description": {
+          "kurz": "{kurz_leer}",
+          "lang": "{lang_leer}"
+        }
+      },
+      "aktion": {
+        "title": "Key {nr} – what should happen?",
+        "description": "{hinweis}",
+        "submit": "Apply",
+        "sections": {
+          "kurz": {
+            "name": "Tap · {kurz_name}",
+            "data": {
+              "action": "Action",
+              "brightness": "Brightness when switching on",
+              "position": "Position"
+            },
+            "data_description": {
+              "brightness": "Only with “On”. Leave empty = as last time.",
+              "position": "Only with “Go to position”. 0 = closed, 100 = open."
+            }
+          },
+          "lang": {
+            "name": "Hold · {lang_name}",
+            "data": {
+              "action": "Action",
+              "brightness": "Brightness when switching on",
+              "position": "Position"
+            },
+            "data_description": {
+              "brightness": "Only with “On”. Leave empty = as last time.",
+              "position": "Only with “Go to position”. 0 = closed, 100 = open."
+            }
+          }
         }
       },
       "zustand": {
@@ -72,6 +109,9 @@
           "schwelle": "From this power on the device counts as on (TV in standby: below 1 W)."
         }
       }
+    },
+    "error": {
+      "position_fehlt": "Please enter a position for “Go to position”."
     }
   },
   "selector": {
@@ -80,9 +120,9 @@
         "toggle": "Toggle",
         "on": "On",
         "off": "Off",
-        "open": "Open (cover)",
-        "close": "Close (cover)",
-        "position": "Set position (cover)"
+        "open": "Open",
+        "close": "Close",
+        "position": "Go to position"
       }
     }
   }

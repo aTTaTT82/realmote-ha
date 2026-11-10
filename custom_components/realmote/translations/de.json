@@ -23,33 +23,70 @@
   "options": {
     "step": {
       "init": {
-        "title": "🎛️ Tastenbelegung",
-        "description": "{overview}\n\nWähle einen Eintrag zum Ändern – oder speichere mit „✅ Fertig“.",
+        "title": "Smart-Home-Tasten",
+        "description": "Tippe auf eine Taste, um sie zu belegen.",
         "menu_options": {
-          "button_1": "🔘 Taste 1 · kurz",
-          "button_2": "🔘 Taste 2 · kurz",
-          "button_3": "🔘 Taste 3 · kurz",
-          "button_4": "🔘 Taste 4 · kurz",
-          "button_5": "🔘 Taste 5 · kurz",
-          "button_6": "🔘 Taste 6 · kurz",
-          "hold_1": "⏱️ Taste 1 · lang halten",
-          "hold_2": "⏱️ Taste 2 · lang halten",
-          "hold_3": "⏱️ Taste 3 · lang halten",
-          "hold_4": "⏱️ Taste 4 · lang halten",
-          "hold_5": "⏱️ Taste 5 · lang halten",
-          "hold_6": "⏱️ Taste 6 · lang halten",
-          "zustand": "🔌 Zustand der Geräte aus Home Assistant",
-          "finish": "✅ Fertig & speichern"
+          "taste_1": "Taste I",
+          "taste_2": "Taste II",
+          "taste_3": "Taste III",
+          "taste_4": "Taste IV",
+          "taste_5": "Taste V",
+          "taste_6": "Taste VI",
+          "zustand": "Zustand der Geräte aus Home Assistant",
+          "finish": "✅ Speichern"
+        },
+        "menu_option_descriptions": {
+          "taste_1": "{t1}",
+          "taste_2": "{t2}",
+          "taste_3": "{t3}",
+          "taste_4": "{t4}",
+          "taste_5": "{t5}",
+          "taste_6": "{t6}",
+          "zustand": "{zustand}",
+          "finish": "Änderungen gelten erst danach"
         }
       },
-      "assign": {
-        "title": "Aktion festlegen",
-        "description": "**{label}** — Gerät & Aktion wählen. Feld „Gerät“ leer lassen = Aktion löschen.{hinweis}\n\n💡 **Tipp:** Auch **Szenen** und **Skripte** sind hier wählbar — damit legst du eine ganze Stimmung (mehrere Lampen, Rollos, …) auf eine Taste. Szenen baust du unter *Einstellungen → Automatisierungen & Szenen → Szenen*; die „Aktion“ ist dabei egal, eine Szene wird immer aktiviert.",
+      "taste": {
+        "title": "Taste {nr}",
+        "description": "Gerät, Szene oder Skript – was soll die Taste schalten?{hinweis}",
         "data": {
-          "entity": "Gerät / Szene / Skript",
-          "action": "Aktion",
-          "brightness": "Helligkeit % (nur Lampe bei „An“)",
-          "position": "Position % (nur Rollo bei „Position setzen“)"
+          "kurz": "Kurz tippen",
+          "lang": "Lang halten"
+        },
+        "data_description": {
+          "kurz": "{kurz_leer}",
+          "lang": "{lang_leer}"
+        }
+      },
+      "aktion": {
+        "title": "Taste {nr} – was soll passieren?",
+        "description": "{hinweis}",
+        "submit": "Übernehmen",
+        "sections": {
+          "kurz": {
+            "name": "Kurz tippen · {kurz_name}",
+            "data": {
+              "action": "Aktion",
+              "brightness": "Helligkeit beim Einschalten",
+              "position": "Position"
+            },
+            "data_description": {
+              "brightness": "Nur bei „An“. Leer lassen = wie zuletzt.",
+              "position": "Nur bei „Auf Position fahren“. 0 = zu, 100 = offen."
+            }
+          },
+          "lang": {
+            "name": "Lang halten · {lang_name}",
+            "data": {
+              "action": "Aktion",
+              "brightness": "Helligkeit beim Einschalten",
+              "position": "Position"
+            },
+            "data_description": {
+              "brightness": "Nur bei „An“. Leer lassen = wie zuletzt.",
+              "position": "Nur bei „Auf Position fahren“. 0 = zu, 100 = offen."
+            }
+          }
         }
       },
       "zustand": {
@@ -72,6 +109,9 @@
           "schwelle": "Ab dieser Leistung gilt das Gerät als an (Fernseher im Standby: unter 1 W)."
         }
       }
+    },
+    "error": {
+      "position_fehlt": "Für „Auf Position fahren“ bitte eine Position angeben."
     }
   },
   "selector": {
@@ -80,9 +120,9 @@
         "toggle": "Umschalten",
         "on": "An",
         "off": "Aus",
-        "open": "Öffnen (Rollo)",
-        "close": "Schließen (Rollo)",
-        "position": "Position setzen (Rollo)"
+        "open": "Öffnen",
+        "close": "Schließen",
+        "position": "Auf Position fahren"
       }
     }
   }
