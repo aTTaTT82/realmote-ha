@@ -21,6 +21,7 @@ DEFAULT_SCHWELLE = 15      # W -- darueber gilt ein Leistungs-Sensor als "an" (F
 # Signal, wenn ein neuer Announce eintrifft (Update-Entity haengt sich dran)
 SIGNAL_ANNOUNCE = f"{DOMAIN}_announce"
 LANG_HUB_DATA = f"{DOMAIN}_lang_hub"   # 0.14.3: je Eintrag die Tasten, die der Hub selbst lang belegt hat
+KURZ_HUB_DATA = f"{DOMAIN}_kurz_hub"   # 0.14.4: dito kurz (Hub ab 4.81.80) -- nur fuer die Anzeige
 
 DEFAULT_BASE_TOPIC = "realmote"
 NUM_BUTTONS = 6

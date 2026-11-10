@@ -27,6 +27,7 @@ from .const import (
     CONF_POSITION,
     DEFAULT_BASE_TOPIC,
     DOMAIN,
+    KURZ_HUB_DATA,
     LANG_HUB_DATA,
     NUM_BUTTONS,
     PLATFORMS,
@@ -92,27 +93,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # lang belegt ist (retained "[1,6]"): der Hub .../lang_hub (ab 4.81.79), wir .../lang_ha. Regel fuer beide: ist eine
     # Taste irgendwo lang belegt, kommt bei langem Druck nur lang; sonst wirkt lang wie kurz -- nie beides
     # (Anwender 10.11.2026: "Wenn lang ausgeloest wird, darf kurz nicht auch noch kommen! Andersrum genauso.").
-    lang_hub_daten: dict = hass.data.setdefault(LANG_HUB_DATA, {})
+    # 0.14.4: dazu .../kurz_hub (Hub ab 4.81.80) -- nur fuer die Anzeige, welche Taste schon im Hub belegt ist
+    for name, ablage in (("lang_hub", LANG_HUB_DATA), ("kurz_hub", KURZ_HUB_DATA)):
+        daten: dict = hass.data.setdefault(ablage, {})
 
-    def _vergiss_lang_hub() -> None:
-        # 🔴 KEIN lambda mit pop(): HA haelt einen Rueckgabewert von on_unload fuer eine Aufgabe und bricht das Entladen
-        # ab (im Test-HA 10.11.2026: "Error unloading entry" -> kein Neuladen nach dem Belegen, Abos blieben stehen)
-        lang_hub_daten.pop(entry.entry_id, None)
+        def _vergiss(_daten: dict = daten) -> None:
+            # 🔴 KEIN lambda mit pop(): HA haelt einen Rueckgabewert von on_unload fuer eine Aufgabe und bricht das
+            # Entladen ab (im Test-HA 10.11.2026: "Error unloading entry" -> kein Neuladen, Abos blieben stehen)
+            _daten.pop(entry.entry_id, None)
 
-    entry.async_on_unload(_vergiss_lang_hub)
+        entry.async_on_unload(_vergiss)
 
-    @callback
-    def _on_lang_hub(msg: mqtt.ReceiveMessage) -> None:
-        try:
-            liste = json.loads(msg.payload)
-        except (ValueError, TypeError):
-            return
-        if isinstance(liste, list):
-            lang_hub_daten[entry.entry_id] = {n for n in liste if isinstance(n, int) and not isinstance(n, bool)}
+        @callback
+        def _on_belegung(msg: mqtt.ReceiveMessage, _daten: dict = daten) -> None:
+            try:
+                liste = json.loads(msg.payload)
+            except (ValueError, TypeError):
+                return
+            if isinstance(liste, list):
+                _daten[entry.entry_id] = {n for n in liste if isinstance(n, int) and not isinstance(n, bool)}
 
-    entry.async_on_unload(
-        await mqtt.async_subscribe(hass, f"{base}/{device_id}/lang_hub", _on_lang_hub)
-    )
+        entry.async_on_unload(await mqtt.async_subscribe(hass, f"{base}/{device_id}/{name}", _on_belegung))
     try:
         belegt = sorted(n for n in range(1, NUM_BUTTONS + 1)
                         if (entry.options.get(f"{n}h") or {}).get(CONF_ENTITY))

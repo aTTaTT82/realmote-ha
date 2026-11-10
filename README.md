@@ -214,6 +214,7 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.14.4** – 🏠 **Was schon im Hub belegt ist, steht jetzt in der Übersicht:** „im Hub belegt“, und wo eine Taste hier **und** im Hub belegt ist, die Warnung „auch im Hub belegt – beides läuft“; beim Belegen nennt das Formular denselben Hinweis. Der Hub meldet dafür ab 4.81.80 auch seine Kurz-Themen (`realmote/<id>/kurz_hub`, retained).
 - **0.14.3** – ⏱️ **Nie lang und kurz zugleich:** Hub und Integration melden einander, wo „lang halten“ belegt ist
   (`realmote/<id>/lang_ha` und `…/lang_hub`, retained). Ist eine Taste irgendwo lang belegt, kommt bei langem Druck nur
   lang; nirgends belegt, wirkt lang wie kurz. 0.14.2 und Hub 4.81.78 schickten bei „kurz im Hub, lang hier“ beides.

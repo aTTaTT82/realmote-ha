@@ -17,6 +17,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    KURZ_HUB_DATA,
     LANG_HUB_DATA,
     ACTIONS,
     CONF_ACTION,
@@ -165,8 +166,15 @@ class RealMoteOptionsFlow(OptionsFlow):
         self._pending: tuple[int, bool] = (1, False)  # (Tastennummer, lang?)
         self._zg: str = "tv"                            # Geraet fuer "Zustand aus Home Assistant"
 
+    def _hub(self, ablage: str) -> set | None:
+        """Was der Hub selbst belegt hat (aus .../lang_hub bzw. .../kurz_hub), None = er meldet es nicht (aelter)."""
+        return self.hass.data.get(ablage, {}).get(self._entry.entry_id)
+
     def _fmt(self, key: str, num: int) -> str:
         """Eine Uebersichtszeile fuer einen Slot (kurz: "1", lang: "1h")."""
+        lang = key.endswith("h")
+        im_hub = self._hub(LANG_HUB_DATA if lang else KURZ_HUB_DATA)
+        im_hub = im_hub is not None and num in im_hub
         cfg = self._options.get(key)
         if cfg and cfg.get(CONF_ENTITY):
             ent = cfg[CONF_ENTITY]
@@ -184,15 +192,17 @@ class RealMoteOptionsFlow(OptionsFlow):
                 extra = f" {int(cfg[CONF_BRIGHTNESS])} %"
             elif cfg.get(CONF_POSITION) is not None:
                 extra = f" {int(cfg[CONF_POSITION])} %"
-            return f"{emoji} **{num}** {friendly} → _{act}{extra}_"
-        # 0.14.2/0.14.3: ein freies "lang halten" wirkt wie kurz tippen (_run_button) -- aber nur, wenn der Hub gemeldet
-        # hat, dass er dafuer selbst kein Lang-Topic hat. Die Uebersicht sagt, was wirklich passiert.
-        if key.endswith("h"):
-            lang_hub = self.hass.data.get(LANG_HUB_DATA, {}).get(self._entry.entry_id)
-            if lang_hub is not None and num in lang_hub:
-                return f"🏠 **{num}** _im Hub belegt_"
+            # 0.14.4 (Anwender 10.11.: Taste 1 war kurz hier UND im Hub belegt, ein Druck schaltete zwei Lampen)
+            warnung = " ⚠️ _auch im Hub belegt – beides läuft_" if im_hub else ""
+            return f"{emoji} **{num}** {friendly} → _{act}{extra}_{warnung}"
+        if im_hub:
+            return f"🏠 **{num}** _im Hub belegt_"
+        # 0.14.2/0.14.3: ein freies "lang halten" wirkt wie kurz tippen -- wenn die Taste kurz belegt ist (hier oder im
+        # Hub) und nirgends lang. Das sagt die Uebersicht nur, wenn der Hub seine Belegung meldet (sonst ist es offen).
+        if lang and self._hub(LANG_HUB_DATA) is not None:
             kurz = self._options.get(str(num))
-            if lang_hub is not None and kurz and kurz.get(CONF_ENTITY):
+            kurz_hub = self._hub(KURZ_HUB_DATA) or set()
+            if (kurz and kurz.get(CONF_ENTITY)) or num in kurz_hub:
                 return f"↩️ **{num}** _wie kurz tippen_"
         return f"⚪ **{num}** _frei_"
 
@@ -376,8 +386,16 @@ class RealMoteOptionsFlow(OptionsFlow):
             }
         )
         label = f"Taste {number} " + ("(lang halten)" if hold else "(kurz tippen)")
+        # 0.14.4: steht im Hub fuer diese Taste schon ein Thema, laufen beide -- das soll man beim Belegen sehen
+        im_hub = self._hub(LANG_HUB_DATA if hold else KURZ_HUB_DATA)
+        hinweis = ""
+        if im_hub is not None and number in im_hub:
+            hinweis = ("\n\n⚠️ **Im Hub ist für diese Taste schon ein Thema eingetragen** (Konfiguration → Smart-Home-Tasten). "
+                       "Belegst du sie hier auch, laufen beide." if str(self.hass.config.language).startswith("de") else
+                       "\n\n⚠️ **This key already has a topic in the hub** (Configuration → Smart home keys). "
+                       "If you assign it here as well, both run.")
         return self.async_show_form(
             step_id="assign",
             data_schema=schema,
-            description_placeholders={"label": label},
+            description_placeholders={"label": label, "hinweis": hinweis},
         )
