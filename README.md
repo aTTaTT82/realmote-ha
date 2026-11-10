@@ -27,7 +27,8 @@ Der Hub meldet per MQTT nur „Taste N gedrückt" – *was* passiert, entscheide
    (Falls nicht: *Integration hinzufügen → RealMote* und die Geräte-ID von der `/health`-Seite eintragen.)
 2. Beim Gerät auf **Konfigurieren** → Taste wählen → **Gerät** aus der Liste, **Aktion**
    (Umschalten/An/Aus/Öffnen/Schließen/Position), optional **Helligkeit %** oder **Position %**.
-3. Fertig. Tastendruck auf der Fernbedienung führt die Aktion aus.
+3. Fertig. Tastendruck auf der Fernbedienung führt die Aktion aus. Bleibt **lang halten** frei, macht langes Halten
+   dasselbe wie kurz tippen (ab 0.14.2).
 
 ## Aktionen
 | Aktion | Wirkt auf | Extra-Feld |
@@ -212,6 +213,8 @@ für den Geräte-Link. Icon & Logo werden ab HA 2026.3 lokal aus dem `brand/`-Or
 (kein `home-assistant/brands`-Eintrag nötig).
 
 ### Änderungen
+- **0.14.2** – ⏱️ **Lang halten ohne Belegung wirkt wie kurz tippen** (wie der Hub mit seinen eigenen Themen ab
+  4.81.78). Bisher tat ein langer Druck auf so eine Taste nichts; die Übersicht zeigt das freie Feld als „wie kurz tippen“.
 - **0.14.1** – 🔌 Zustand der Geräte: ein Leistungs-Sensor in **kW** (oder MW, mW) wird in Watt umgerechnet, bevor er mit
   der Schwelle verglichen wird. Bisher galten 0,08 kW als 0,08 W — das Gerät stand fälschlich auf „aus“.
 - **0.14.0** – 🎚️ **Auswahl „Aktivität“** (zeigt und wechselt die laufende Aktivität), 🔋 **Sensor „Akku

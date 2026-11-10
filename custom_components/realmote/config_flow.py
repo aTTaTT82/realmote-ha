@@ -184,6 +184,10 @@ class RealMoteOptionsFlow(OptionsFlow):
             elif cfg.get(CONF_POSITION) is not None:
                 extra = f" {int(cfg[CONF_POSITION])} %"
             return f"{emoji} **{num}** {friendly} → _{act}{extra}_"
+        # 0.14.2: ein freies "lang halten" wirkt wie kurz tippen (_run_button) -- das soll die Uebersicht auch sagen
+        kurz = self._options.get(str(num))
+        if key.endswith("h") and kurz and kurz.get(CONF_ENTITY):
+            return f"↩️ **{num}** _wie kurz tippen_"
         return f"⚪ **{num}** _frei_"
 
     def _overview(self) -> str:

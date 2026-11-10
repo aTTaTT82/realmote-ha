@@ -177,6 +177,10 @@ async def _run_button(
     """Die fuer diese Taste (kurz/lang) hinterlegte Aktion ausfuehren."""
     key = f"{button}h" if hold else str(button)  # kurz: "1".."6", lang: "1h".."6h"
     cfg = entry.options.get(key)
+    if hold and (not cfg or not cfg.get(CONF_ENTITY)):
+        # 0.14.2 (Anwender 10.11.2026): ist "lang halten" frei, wirkt langes Halten wie kurz tippen -- wie der Hub mit
+        # seinen eigenen Topics ab 4.81.78. Bis 0.14.1 tat ein langer Druck auf so eine Taste nichts.
+        cfg = entry.options.get(str(button))
     if not cfg or not cfg.get(CONF_ENTITY):
         _LOGGER.debug("RealMote: Taste %s (%s) ist nicht belegt", button, "lang" if hold else "kurz")
         return
