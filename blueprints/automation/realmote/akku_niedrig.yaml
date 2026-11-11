@@ -22,8 +22,8 @@ blueprint:
     schwelle:
       name: Melden unter
       description: >-
-        Unter etwa 3,4 V kann die Fernbedienung ihren Akku nicht genauer messen, die Anzeige bleibt dann bei rund 25 %
-        stehen. Darum meldet sich diese Vorlage schon bei 30 % – mit einer Schwelle unter 25 % käme die Meldung womöglich nie.
+        Unter etwa 3,4 V misst die Fernbedienung ihren Akku nicht mehr genau, die Anzeige kann dann bei rund 25 % stehen
+        bleiben. Darum meldet sich diese Vorlage schon bei 30 % – mit einer Schwelle unter 25 % käme die Meldung womöglich nie.
       default: 30
       selector:
         number:
