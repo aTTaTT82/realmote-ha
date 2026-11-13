@@ -1,8 +1,13 @@
 blueprint:
   name: "RealMote: Akku der Fernbedienung niedrig"
   description: >-
-    Meldet sich, wenn der Akku der RealMote-Fernbedienung unter die Schwelle fällt – einmal je Unterschreiten,
-    nicht nach jedem Neustart von Home Assistant erneut. Der Hub übernimmt den Ladestand einmal am Tag.
+    Meldet sich wie am Handy zweimal: wenn der Akku der RealMote-Fernbedienung unter die erste Schwelle fällt
+    (Vorgabe 20 %) und noch einmal, wenn er fast leer ist (Vorgabe 10 %) – jeweils einmal je Unterschreiten,
+    nicht nach jedem Neustart von Home Assistant erneut. In der Benachrichtigung stehen {{ prozent }} (der
+    Ladestand) und {{ stufe }} („schwach“ oder „leer“) zur Verfügung.
+    Seit Hub-Firmware 4.81.84 ist die Zahl die echte Ladung: Der Hub rechnet sie über die Entladekurve des Akkus,
+    lernt beim ersten vollen Laden, wie „voll“ bei dieser Fernbedienung aussieht, und lässt sie nur fallen – steigen
+    kann sie nur nach dem Laden. Ganz genau ist sie mit Fernbedienung ab v3.14 nach dem ersten vollen Laden.
     Braucht die RealMote-Integration ab 0.14.0 (Hub-Firmware ab 4.81.64).
   domain: automation
   author: RealMote
@@ -20,20 +25,32 @@ blueprint:
               integration: realmote
               device_class: battery
     schwelle:
-      name: Melden unter
+      name: Erste Meldung unter
       description: >-
-        Unter etwa 3,4 V misst die Fernbedienung ihren Akku nicht mehr genau, die Anzeige kann dann bei rund 25 % stehen
-        bleiben. Darum meldet sich diese Vorlage schon bei 30 % – mit einer Schwelle unter 25 % käme die Meldung womöglich nie.
-      default: 30
+        Der Akku wird schwach – Zeit, ihn bald zu laden. Am Handy kommt diese Meldung bei 20 %. Mit einem Hub vor
+        4.81.84 blieb die Anzeige unter etwa 3,4 V bei rund 25 % stehen; dort sind 30 % die sicherere Wahl.
+      default: 20
       selector:
         number:
           min: 5
           max: 50
           step: 5
           unit_of_measurement: "%"
+    schwelle_leer:
+      name: Zweite Meldung unter
+      description: Der Akku ist fast leer – bald gehen Tastendrücke verloren. Am Handy kommt diese Meldung bei 10 %.
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 5
+          unit_of_measurement: "%"
     aktionen:
       name: Benachrichtigung
-      description: Was passieren soll, z. B. eine Nachricht an dein Handy.
+      description: >-
+        Was passieren soll, z. B. eine Nachricht an dein Handy. Die Vorlagen {{ prozent }} und {{ stufe }} stehen in
+        Texten zur Verfügung.
       selector:
         action: {}
 
@@ -42,15 +59,35 @@ max_exceeded: silent
 
 triggers:
   - trigger: numeric_state
+    id: schwach
     entity_id: !input akku
     below: !input schwelle
+  - trigger: numeric_state
+    id: leer
+    entity_id: !input akku
+    below: !input schwelle_leer
 
 conditions:
-  # Nach einem Neustart kommt der Wert aus "nicht verfuegbar" -- das ist kein neues Unterschreiten
+  # Nach einem Neustart kommt der Wert aus "nicht verfuegbar" -- das ist kein neues Unterschreiten.
+  # Springt der Wert in einem Schritt ueber beide Schwellen, feuern beide Ausloeser im selben Augenblick, und
+  # mode: single haelt den zweiten Lauf NICHT sicher ab (gemessen 13.11.2026 in HA 2026.11.1: beide liefen, 1 ms
+  # auseinander) -- deshalb zaehlt "schwach" nur, solange der Wert nicht schon unter der zweiten Schwelle liegt.
   - condition: template
     value_template: >-
       {{ trigger.platform == 'numeric_state'
          and trigger.from_state is not none
-         and is_number(trigger.from_state.state) }}
+         and is_number(trigger.from_state.state)
+         and (trigger.id == 'leer' or (prozent | float(100)) >= (leer_unter | float(0))) }}
+
+# Die Variablen stehen schon in der Bedingung oben zur Verfuegung (Home Assistant rechnet sie vorher). Die Stufe kommt
+# aus dem Wert, nicht aus dem Ausloeser. Ohne Ausloeser (Probelauf "Aktionen ausfuehren") gilt der aktuelle Zustand
+# des Sensors.
+variables:
+  akku_sensor: !input akku
+  leer_unter: !input schwelle_leer
+  prozent: >-
+    {{ trigger.to_state.state if (trigger is defined and trigger.to_state is defined and trigger.to_state is not none)
+       else states(akku_sensor) }}
+  stufe: "{{ 'leer' if (prozent | float(100)) < (leer_unter | float(0)) else 'schwach' }}"
 
 actions: !input aktionen

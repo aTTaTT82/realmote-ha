@@ -1,10 +1,11 @@
 """Sensor "Akku Fernbedienung" (v0.14.0).
 
-Der Hub meldet den Ladestand retained auf realmote/<id>/akku = 0..100 (Firmware >= 4.81.64). Er uebernimmt ihn
-einmal am Tag aus den Funkpaketen (der Wert wackelt unter Sendelast) -- der Sensor aendert sich also selten.
-Mit mehreren Fernbedienungen an einem Hub zeigt er den Wert, den der Hub zuletzt uebernommen hat -- von der
-Fernbedienung, die nach dem Neustart des Hubs bzw. nach Ablauf des Tages als erste gefunkt hat. Fuer eine
-Warnung bei niedrigem Stand gibt es einen Blueprint im Repo.
+Der Hub meldet den Ladestand retained auf realmote/<id>/akku = 0..100 (Firmware >= 4.81.64). Seit Hub 4.81.84
+ist das die echte Ladung wie am Handy: Entladekurve statt Gerade, "voll" je Fernbedienung beim ersten vollen Laden
+gelernt, jede Messung statt einmal am Tag, die Zahl faellt nur und steigt nur nach dem Laden. Mit mehreren
+Fernbedienungen an einem Hub ist es die niedrigste von denen, die sich in den letzten drei Tagen gemeldet haben --
+dieselbe Zahl wie auf der Fernbedienungsseite. Bis Hub 4.81.81: einmal am Tag, linear 3,0..4,2 V.
+Fuer eine Warnung bei 20 % und 10 % gibt es einen Blueprint im Repo.
 """
 from __future__ import annotations
 
